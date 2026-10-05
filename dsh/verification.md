@@ -124,9 +124,21 @@ Two guards were added: a consumer-list check that fails when the adapter's claim
 
 ## 3. Repository gates
 
-- `bun run release:validate` — passes: "0 agents, 36 skills, 0 MCP servers". The plugin inventory is untouched because the binding lives outside `skills/`.
-- The change-specific guards — `codex-skill-prompt-budget`, `skill-conventions`, `review-skill-contract`, `frontmatter`, `pov-skill-contract`, `release-metadata`, `ce-babysit-pr-contract`, `skill-shell-safety`: **714 pass, 0 fail**.
-- `bun run test` in full — **not green on this machine, and not green on a pristine checkout either.** A detached worktree of the base commit (`9af474a7`, no changes) fails 49 of 4437 tests here. The failures are dominated by `spawnSync timed out or lost child-exit` inside the python3-backed skill scripts and by fixture `git commit` errors; the repository's own `AGENTS.md` names the first as a bun defect (`oven-sh/bun#34069`), and its serial re-run for that signature did not clear them. The extra failures over baseline sit in files this change does not touch and pass on their own, though the `ce-work` unit-workspace tests take 9–26 seconds each against a 20–30 second timeout, so they sit on the boundary. Details: the same suite produced 106 failures while a reviewer fan-out ran alongside it and 79 when it ran alone.
+Measured on the rebased tree, against a detached worktree of `upstream/main` (`030188b4`) on the same machine.
+
+| Gate | Result |
+|---|---|
+| `bun run release:validate` | passes: "0 agents, 36 skills, 0 MCP servers" — the plugin inventory is untouched |
+| `bun run typecheck` | clean |
+| `bun run test:skill-guards` (fast subset, 22 files) | **797 pass, 0 fail** |
+| `check-coverage.sh` / `audit-bindings.sh` | exit 0, 0 skill-level gaps, 0 audit failures |
+| `bun run test` (full) | fork 29 fail, pristine upstream **19 fail** — same base, same machine |
+
+**Attribution of the ten-test difference — closed.** One was real: the `ce-optimize` em-dash guard, described below. The other nine are load flakes: `skill-eval-cell catalog`, `pi-writer`, and `session-history-scripts` pass in isolation (151 tests, 0 fail), and `ce-babysit-pr-snapshot` with `sweep-state` — the two families that appeared only in the fork's run — pass in isolation too (202 tests, 0 fail). The remaining families flake in both runs: `ce-work serial cross-model transaction` fails 20 times pristine and 22 in the fork, `ce-work unit workspace controller` 4 pristine and 8 in the fork, all with the `spawnSync`/child-exit signature the repository's `AGENTS.md` attributes to `oven-sh/bun#34069`. With the em-dash fix in, no test failure is attributable to this fork.
+
+**A real regression this round caught.** Rebasing and running the *entire* suite found that `tests/skills/ce-optimize-decide.test.ts` rejects em dashes anywhere under the `ce-optimize` skill, and the binding paragraphs added to `loop.md` and `measurement.md` contained one. It passed on the pristine base and failed here. Both files now carry an em-dash-free binding, and that file is 81/81. The fast `test:skill-guards` subset does not include it, which is why every earlier targeted run missed it — a reminder that the subset is not the gate.
+
+The same suite previously produced 106 failures while a reviewer fan-out ran alongside it, 79 when it ran alone on the older base, and 49 on the older base pristine. Load and base both move these numbers; only the paired comparison above is meaningful.
 
 ## 4. Installer behavior
 
