@@ -11,7 +11,7 @@ CE prose names capabilities, not tools. In this harness they are:
 | the platform's file-read / write / edit tool | `read`, `write`, `edit` |
 | run a command | `bash` |
 | search file contents / find files | `grep`, `glob` |
-| the host's subagent primitive | `spawn_teammate` by default; `workflow` and `subagent` on the fallback ladder |
+| the host's subagent primitive | `spawn_teammate` when the Agent Teams bundle is enabled; otherwise `subagent`, with `workflow` available in both profiles |
 | the host's bounded in-turn wait | `wait_agent`, repeated back to back |
 | a durable scheduler | `schedule_create` |
 | ask the user | `ask_user_question` |

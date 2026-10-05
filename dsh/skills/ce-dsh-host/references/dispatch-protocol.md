@@ -29,7 +29,7 @@ Carry the calling skill's full review context, not just the diff: scope mode, th
 
 ## 3. Spawn the teammate
 
-`spawn_teammate(name, description, prompt)` — the `prompt` is the complete initial task, and a teammate has full tool access, so it reads its own persona file rather than receiving its contents.
+`spawn_teammate(name, description, prompt)` — the `prompt` is the complete initial task, and a teammate has full tool access, so it reads its own persona file rather than receiving its contents. The exception is a calling skill whose own template inlines the persona as part of that skill's contract, as `ce-sweep`'s does; follow that template.
 
 The brief carries, in this order: the persona or prompt-asset path and the instruction to follow it; the scope-rules and criteria paths; the diff path; the review context; the artifact path with the note that this is the only permitted write; the shared task id with the instruction to claim it before working and complete it after the artifact is written; the compact-return shape; and the instruction to send the lead exactly one message containing only that compact JSON.
 
@@ -56,11 +56,17 @@ loop:
 - A teammate that reports but whose artifact is missing is collected with the missing artifact noted, because the merge reads artifacts and degrades to the compact return.
 - Never end the turn to await a dispatch. The waits are in-turn; a turn that ends on "still waiting" is the failure CE names explicitly. The one licensed exception is a dispatch the calling skill deliberately runs across the user's think-time — `ce-brainstorm`'s opening scout. There the turn ends on a question to the user, not on waiting, and the collection happens when the answer returns.
 
-## Fallback ladder
+## Precondition, then the fallback ladder
 
-Take the first rung that works, and record which one was taken:
+Everything above assumes the Agent Teams bundle (`dsh-experimental-agent-team-profile`) is enabled in the DSH profile. **It ships switched off.** With it off there is no `spawn_teammate`, no shared board, and no `wait_agent`, so nothing in this file applies and the calling skill's own host-neutral text is the whole instruction.
 
-1. **Teammates**, as above.
-2. **`workflow` batch** with `parallel()` and a projected per-agent schema — the rung for a dispatch that needs an in-harness model override, and for an orchestrator that is not the Lead. A workflow schema accepts only `type`, `properties`, `required`, `additionalProperties`, `items`, `enum`, `const`, `oneOf`, so project CE's `findings-schema.json` rather than passing it through, and do not set `additionalProperties: false` on a finding — a validation failure resolves that agent to `null`, which reads as a failed reviewer.
-3. **Single `subagent`** with `run_in_background: false`, one dispatch at a time.
-4. **Inline**, in the orchestrator's own context. CE governs this rung: an inline pass is not independent, contributes attributed evidence only, and the lost coverage is named in the result.
+With it on, the bundle also changes the rest of the toolset: ordinary `subagent` delegation and the overlapping global child controls are disabled, while `workflow` can still create fresh children. So the available rungs differ by profile, and the two profiles do not share one ladder:
+
+| Profile | Ladder, first rung that works |
+|---|---|
+| **Agent Teams on** | teammates, then a `workflow` batch, then inline |
+| **Agent Teams off** | `subagent` with `run_in_background: false`, then a `workflow` batch, then inline |
+
+Record which rung you took. Inline is last in both because CE governs it: an inline pass is not independent, contributes attributed evidence only, and the lost coverage is named in the result.
+
+A `workflow` schema accepts only `type`, `properties`, `required`, `additionalProperties`, `items`, `enum`, `const`, `oneOf`, so project CE's `findings-schema.json` rather than passing it through, and do not set `additionalProperties: false` on a finding — a validation failure resolves that agent to `null`, which reads as a failed reviewer.

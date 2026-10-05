@@ -9,6 +9,8 @@ description: "Binds Compound Engineering's host-neutral dispatch language to Dee
 
 **Done.** Every dispatch became a teammate, every teammate was collected in-turn or recorded as failed, and the merge read artifacts rather than this context.
 
+**Precondition.** The Agent Teams bundle (`dsh-experimental-agent-team-profile`) **ships switched off**. If `spawn_teammate` is not in this session's toolset, nothing in this skill applies: follow the calling skill's own host-neutral text, or the profile-specific ladder in `references/dispatch-protocol.md`.
+
 ## Pick the primitive
 
 | The work is | Use | Why |
@@ -16,7 +18,7 @@ description: "Binds Compound Engineering's host-neutral dispatch language to Dee
 | Any CE subagent dispatch — one agent or a batch, leaf or worker | `spawn_teammate`, one shared task per dispatch | This is the harness default for CE work. The member is durable and addressable, and the task board records the dispatch. |
 | Collecting those launches | repeated `wait_agent` with a bound | CE's own text prescribes exactly this: a blocking collection wait repeated back to back until every launch is terminal or its artifact lands, which it states is *not* the forbidden detached-delegate poll loop. |
 | A dispatch that must run on a **different model** — panel peer, cross-model author or reviewer, per-persona tier | `workflow` with `provider`/`model` overrides, or CE's external-adapter path | A teammate runs the session model; `spawn_teammate` takes no model override. See the exception below. |
-| A dispatch issued by an agent that is not the Team Lead | `workflow` batch, then a single `subagent` | `spawn_teammate` is Lead-only. |
+| A dispatch issued by an agent that is not the Team Lead | `workflow` batch, then inline | `spawn_teammate` is Lead-only, and the team bundle disables ordinary `subagent` delegation. |
 | A background shell process — the `ce-babysit-pr` detector | `bash` with `run_in_background`, then `job_output` with `wait: true` | Not a subagent dispatch; a process wait. |
 
 **A dispatch that cannot be a teammate.** `spawn_teammate` takes no model override and a teammate runs the session model, so a peer that must run **in-harness on a second configured provider** has no teammate form; `workflow`'s `agent(prompt, { provider, model })` is the only primitive that expresses it. (The other dispatches that leave the teammate rung are those issued by an agent that is not the Lead, in the table above.) Two things that look like exceptions are not. A peer that runs through an external CLI — CE's own cross-model route — is hosted *by* a teammate that runs the CLI and reports, because the model diversity comes from the CLI rather than from the teammate. And per-persona model tiering still runs as teammates whenever the tiers would not actually differ.

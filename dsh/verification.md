@@ -46,7 +46,9 @@ The static audits cannot show that a CE skill actually reaches for the binding. 
 - **P3** — `verification.md` both misdescribed which 18 bindings lack the clause and still quoted a stale 46. Fixed.
 - **P3** — the README's "the only dispatch that leaves the teammate rung" survived the identical fix applied to `primitive-map.md`, and the same overstatement sat in the adapter's `SKILL.md` and `primitive-map.md`. All three fixed.
 
-**Not exercised:** Stages 5 and 6 (the merge leaf, validator, and report leaf). The dispatch binding is proven at Stage 4 and in the peer and task bindings; the leaf path uses the same primitive, but it has not been run.
+**Stages 5 and 6 then ran the same way.** A merge leaf was dispatched as a teammate, claimed its shared task, folded the two reviewer artifacts into `merged.json` — 6 raw findings into 5 distinct, with the ce-sweep P2 both reviewers reached independently recorded as one finding carrying both reviewer names — and reported. A report leaf then rendered `report.md` (18.9 KB) per its contract: ASCII tables, findings ordered by severity then confidence, the coverage limits the merge recorded, and an explicit note that no adversarial peer ran, so cross-reviewer agreement on the top finding is not cross-model corroboration. It also flagged that the tree had moved past the reviewed revision and re-checked the line-anchored findings before acting.
+
+**Not exercised:** the validator leaf that sits between merge and report, and the non-Lead fallback path (a CE skill executing inside a dispatched agent). The second-provider model override cannot be exercised here at all — this profile configures one provider — and the external-CLI peer route is unavailable because the CLIs on this machine fail to authenticate.
 
 ## 1c. Mirror fidelity: the fork versus upstream
 
