@@ -57,7 +57,9 @@ echo "$RUN_DIR";
 A behavior trace that splits across ownership boundaries writes scout dossiers. Create this run directory before dispatching those scouts.
 
 - **Diff mode.** **Empty range** or missing subject: do not silently explain something else. Report that before explaining an adjacent thing. Use a substitute only when the request permits it or the user agrees; name the substitution in the result and artifact `Subject` when present. Otherwise return the unresolved scope to the caller.
-- **Recap mode.** Do not pre-scan, count, or characterize the window in the main conversation. Instead dispatch a generic subagent directly at the extraction tier, seeded with `references/agents/work-recap-scout.md` and passed the resolved window, repo root, and `$RUN_DIR`. **Empty window:** report the absence of activity and finish without an explainer artifact. **When the harness exposes no subagent primitive**, run the scout inline with its prompt's sources and budgets, still write `recap-evidence.md`, and form no view of the window until it is done. **On DeepSeek Harness** this dispatch is an Agent Teams teammate; the `ce-dsh-host` skill carries the protocol. If dispatch fails, follow the fallback rule in `references/orchestration.md`.
+- **Recap mode.** Do not pre-scan, count, or characterize the window in the main conversation. Instead dispatch a generic subagent directly at the extraction tier, seeded with `references/agents/work-recap-scout.md` and passed the resolved window, repo root, and `$RUN_DIR`. **Empty window:** report the absence of activity and finish without an explainer artifact. **When the harness exposes no subagent primitive**, run the scout inline with its prompt's sources and budgets, still write `recap-evidence.md`, and form no view of the window until it is done. If dispatch fails, follow the fallback rule in `references/orchestration.md`.
+
+**On DeepSeek Harness** this dispatch is an Agent Teams teammate; the `ce-dsh-host` skill carries the protocol.
 
 ### Phase 3: Compose the explanation
 

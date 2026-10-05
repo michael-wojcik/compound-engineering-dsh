@@ -1,6 +1,8 @@
 # Dispatching the reviewers
 
-Dispatch generic subagents with **bounded parallelism** using the platform's subagent primitive (e.g., `Agent` in Claude Code, `spawn_agent` in Codex, and on DeepSeek Harness an Agent Teams teammate per reviewer under the `ce-dsh-host` skill's dispatch protocol, falling back to the serial path here when that skill or the team facilities are unavailable) where available; otherwise run the work inline or serially. Omit the `mode` parameter so the user's configured permission settings apply.
+Dispatch generic subagents with **bounded parallelism** using the platform's subagent primitive (e.g., `Agent` in Claude Code, `spawn_agent` in Codex) where available; otherwise run the work inline or serially. Omit the `mode` parameter so the user's configured permission settings apply.
+
+**On DeepSeek Harness**, each reviewer is an Agent Teams teammate under the `ce-dsh-host` skill's dispatch protocol; fall back to this file's inline or serial path when that skill or the team facilities are unavailable.
 
 Respect the harness's active-subagent limit: dispatch only as many selected reviewers as it accepts and queue the remainder. Treat active-agent/thread/concurrency-limit spawn errors as backpressure, not reviewer failure: the harness is full, so wait for a slot rather than marking the reviewer failed. Keep rejected reviewers queued while active work finishing, or a supported release of an agent, can free capacity, and retry when a slot frees. When capacity cannot recover, use the incomplete-stop condition in Phase 2 (dispatch) rather than retrying indefinitely. Record a reviewer as failed only after a successful dispatch times out or fails, or when dispatch fails for a non-capacity reason that survives correcting the invocation.
 

@@ -48,6 +48,22 @@ The static audits cannot show that a CE skill actually reaches for the binding. 
 
 **Not exercised:** Stages 5 and 6 (the merge leaf, validator, and report leaf). The dispatch binding is proven at Stage 4 and in the peer and task bindings; the leaf path uses the same primitive, but it has not been run.
 
+## 1c. Mirror fidelity: the fork versus upstream
+
+The objective has two halves, and this is the first: that the DSH skills still *are* the original plugin's skills. Measured against `upstream/main`, the entire divergence is:
+
+| | |
+|---|---|
+| Files deleted or renamed | **0** |
+| Upstream lines modified or removed | **0** |
+| Lines added across `skills/` | **136**, across 62 files |
+| Non-plugin divergence | the `dsh/` tree only — the adapter skill, the three scripts, `README.md`, `verification.md` |
+| Untouched | every manifest, `src/`, `tests/`, the plugin `README.md`, the marketplace catalogs, and all 36 `SKILL.md` files except two that took a standalone paragraph |
+
+Every upstream instruction is byte-identical: the fork adds binding paragraphs and changes no original sentence. The two files whose line counts moved are `ce-doc-review/references/dispatch.md` and `ce-explain/SKILL.md`, and in both the binding was first written *into* the upstream sentence and then moved out to its own paragraph, precisely so this table could read zero modified lines rather than two.
+
+The fork is rebased on `upstream/main` (`030188b4`, 0 commits behind). Its base changed once during this work: the earlier base predated upstream's test-loop repair, which is why the `TimeoutError` failures recorded in section 3 appeared at all.
+
 ## 2. Coverage of the binding
 
 `dsh/check-coverage.sh` reports two levels: skill level is a gate, file level is evidence for review.
