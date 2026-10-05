@@ -5,7 +5,7 @@ description: "Binds Compound Engineering's host-neutral dispatch language to Dee
 
 # CE on DeepSeek Harness
 
-**Outcome.** Every subagent a CE skill needs runs as an Agent Teams teammate: one shared task per dispatch, the launch collected inside the turn that made it by repeated bounded `wait_agent` calls, and the artifact on disk still the fact the merge reads. Consumers are the CE orchestrators that dispatch — `ce-code-review`, `ce-doc-review`, `ce-sweep`, `ce-pov`, `ce-work`, `ce-plan`, `ce-brainstorm`, `ce-ideate`, `ce-compound`, `ce-compound-refresh`, `ce-optimize`, `ce-bakeoff`, `ce-resolve-pr-feedback`, `ce-prototype`, `ce-explain`, `ce-debug`, `lfg`.
+**Outcome.** Every subagent a CE skill needs runs as an Agent Teams teammate: one shared task per dispatch, the launch collected inside the turn that made it by repeated bounded `wait_agent` calls, and the artifact on disk still the fact the merge reads. Consumers are the CE skills that carry a binding — `ce-babysit-pr`, `ce-bakeoff`, `ce-brainstorm`, `ce-code-review`, `ce-compound`, `ce-compound-refresh`, `ce-debug`, `ce-doc-review`, `ce-explain`, `ce-ideate`, `ce-optimize`, `ce-plan`, `ce-pov`, `ce-prototype`, `ce-resolve-pr-feedback`, `ce-retune`, `ce-simplify-code`, `ce-sweep`, `ce-work`. `dsh/audit-bindings.sh` fails when that list and the files that actually carry a binding disagree.
 
 **Done.** Every dispatch became a teammate, every teammate was collected in-turn or recorded as failed, and the merge read artifacts rather than this context.
 

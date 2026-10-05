@@ -97,6 +97,18 @@ fails=$((fails + missing))
 [[ "$missing" -eq 0 ]] && echo "   ok: every reference the adapter names resolves"
 
 echo
+echo "5. CONSUMER LIST — the adapter names exactly the skills that carry a binding"
+claimed="$(sed -n '/Consumers are the CE skills that carry a binding/,/audit-bindings.sh/p' "$ADAPTER/SKILL.md" | grep -oE '`ce-[a-z-]+`' | tr -d '`' | sort -u)"
+actual="$(for d in "$SKILLS_DIR"/*/; do n="$(basename "$d")"; grep -rq 'ce-dsh-host' "$d" 2>/dev/null && echo "$n"; done | sort -u)"
+if [[ "$claimed" == "$actual" ]]; then
+  echo "   ok: $(printf '%s\n' "$actual" | grep -c .) skills claimed and bound, and no others"
+else
+  echo "   FAIL: the adapter's consumer list disagrees with the tree (claimed vs bound):"
+  diff <(printf '%s\n' "$claimed") <(printf '%s\n' "$actual") | sed 's/^/     /'
+  fails=$((fails + 1))
+fi
+
+echo
 echo "files carrying a binding: $(grep -rl 'ce-dsh-host' "$SKILLS_DIR" --include='*.md' 2>/dev/null | wc -l | tr -d ' ')"
 echo "audit failures: $fails"
 exit "$fails"
