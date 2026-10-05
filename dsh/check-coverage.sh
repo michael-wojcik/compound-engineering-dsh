@@ -42,7 +42,7 @@ for dir in "$SKILLS_DIR"/*/; do
   while IFS= read -r f; do
     [[ -n "$f" ]] || continue
     is_prompt_asset "$f" || filtered="$filtered$f"$'\n'
-  done < <(grep -rlE "$DISPATCH_RE" "$dir" --include="*.md" 2>/dev/null || true)
+  done < <(grep -rliE "$DISPATCH_RE" "$dir" --include="*.md" 2>/dev/null || true)
 
   bound="$(grep -rl 'ce-dsh-host' "$dir" --include="*.md" 2>/dev/null || true)"
 
@@ -72,13 +72,17 @@ while IFS= read -r f; do
   # A line that forbids or avoids a dispatch is a mention, not a launch site.
   # The negation must sit next to the verb: matching it anywhere on the line hid
   # a real launch whose line happened to contain an unrelated "without".
-  hits="$(grep -nE "$DISPATCH_RE" "$f" | grep -vEi "(do not|don't|never|without|rather than|instead of|temptation to|no subagents|skips)[a-z ]{0,12}(spawn|dispatch|launch|delegate)" || true)"
+  hits="$(grep -niE "$DISPATCH_RE" "$f" | grep -vEi "(do not|don't|never|without|rather than|instead of|temptation to|no subagents|skips)[a-z ]{0,12}(spawn|dispatch|launch|delegate)" || true)"
   if [[ -z "$hits" ]]; then
     mentions=$((mentions + 1))
     continue
   fi
   printf '  LAUNCH   %s\n' "${f#"$REPO_ROOT"/}"
-  printf '%s\n' "$hits" | head -1 | cut -c1-140 | sed 's/^/           /'
+  # Print every candidate line, not just the first. An earlier version showed only
+  # head -1, which let a file whose first match was descriptive be dismissed while a
+  # real launch sat further down — that is how ce-retune/cut-passes.md and
+  # ce-ideate/post-ideation-workflow.md passed review unbound.
+  printf '%s\n' "$hits" | head -3 | cut -c1-140 | sed 's/^/           /'
   launch_unbound=$((launch_unbound + 1))
 done < <(grep -rlE "$DISPATCH_RE" "$SKILLS_DIR" --include="*.md" 2>/dev/null | sort)
 echo "  ($mentions further files mention a dispatch without launching one)"

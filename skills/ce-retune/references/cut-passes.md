@@ -6,6 +6,8 @@ A pass applies **one problem class** across the corpus and stops. The work fails
 
 ## The pass loop
 
+**On DeepSeek Harness**, every agent this file dispatches is spawned as an Agent Teams teammate: load the `ce-dsh-host` skill and follow its dispatch protocol — one shared task per dispatch, one teammate per agent, collected in this turn with bounded waits, with the artifact still the fact the merge reads. When that skill is not installed, follow this file unchanged.
+
 1. Pick one class from the Phase 3 findings (`references/corpus-audit.md`), or one regression class from `references/halt-taxonomy.md`. One class per pass, no bundling.
 2. Write the **file-assignment manifest**: unit -> the agent that edits it -> exact paths. Every copy of a shared asset goes to a single named agent (below).
 3. If the rewrite has cross-referencing strings, author the **contract file** first, serially (below).

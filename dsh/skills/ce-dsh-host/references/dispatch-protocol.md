@@ -2,6 +2,8 @@
 
 Every CE subagent dispatch is an Agent Teams dispatch: one shared task, one teammate, one artifact, collected inside the turn that launched it. This protocol was validated end to end before it was written down — two persona reviewers spawned concurrently, each read its persona and diff from disk, wrote its artifact, claimed and completed its shared task, and reported compact JSON the orchestrator collected with bounded waits.
 
+**This protocol governs every dispatch the reader performs under any CE skill for the rest of the session, not only dispatches from the file whose binding sent you here.** Individual bindings name the file that carries them; a CE run reads several files per stage, so treat the binding as skill-wide and this protocol as session-wide.
+
 The invariants it keeps: every launch is collected in the turn that made it; the artifact on disk stays the fact the merge reads; a failed dispatch is recorded as failed rather than dropped; a batch the harness rejects for capacity is retried, not shrunk.
 
 ## Preconditions

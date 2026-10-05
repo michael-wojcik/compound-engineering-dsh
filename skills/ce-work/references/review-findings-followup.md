@@ -55,6 +55,8 @@ The lead agent decides which findings to act on, groups the work, reviews the di
 
 ### Where each fix runs
 
+**On DeepSeek Harness**, every agent this file dispatches is spawned as an Agent Teams teammate: load the `ce-dsh-host` skill and follow its dispatch protocol — one shared task per dispatch, one teammate per agent, collected in this turn with bounded waits, with the artifact still the fact the merge reads. When that skill is not installed, follow this file unchanged.
+
 Dispatch file-grouped subagent batches when fixes need code you have not read, or when fixes on disjoint files form a real parallel wave. Apply every other fix in this context: one whose code is already in your context from this session's work, or a small region you can read without materially growing this context. The lead agent stays active through tests, commits, and the handoff, so loading many cited files here is the cost delegation avoids.
 
 **Batching (primary rule: group by file):**

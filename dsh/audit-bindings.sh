@@ -46,7 +46,7 @@ checked=0
 while IFS= read -r f; do
   [[ -n "$f" ]] || continue
   pline="$(grep -n "ce-dsh-host" "$f" 2>/dev/null | head -1 | cut -d: -f1)"
-  lline="$(grep -nE "$LAUNCH_RE" "$f" 2>/dev/null | grep -vEi "$NEGATE_RE" | head -1 | cut -d: -f1)"
+  lline="$(grep -niE "$LAUNCH_RE" "$f" 2>/dev/null | grep -vEi "$NEGATE_RE" | head -1 | cut -d: -f1)"
   [[ -n "$pline" && -n "$lline" ]] || continue
   checked=$((checked + 1))
   if [[ "$pline" -gt "$lline" ]]; then
@@ -107,6 +107,19 @@ else
   diff <(printf '%s\n' "$claimed") <(printf '%s\n' "$actual") | sed 's/^/     /'
   fails=$((fails + 1))
 fi
+
+echo
+echo "6. VACUOUS BINDINGS — a positive dispatch binding in a file with no launch instruction"
+vacuous=0
+while IFS= read -r f; do
+  [[ -n "$f" ]] || continue
+  grep -qE "$STANDARD|$REVIEWER|$ANALYZER|$SHORT" "$f" || continue
+  if ! grep -qiE "$LAUNCH_RE" "$f"; then
+    echo "   REVIEW: ${f#"$REPO_ROOT"/} says \"every agent this file dispatches\" but launches nothing"
+    vacuous=$((vacuous + 1))
+  fi
+done < <(grep -rl "ce-dsh-host" "$SKILLS_DIR" --include="*.md" 2>/dev/null | sort)
+[[ "$vacuous" -eq 0 ]] && echo "   ok: every positive dispatch binding sits in a file that launches an agent"
 
 echo
 echo "files carrying a binding: $(grep -rl 'ce-dsh-host' "$SKILLS_DIR" --include='*.md' 2>/dev/null | wc -l | tr -d ' ')"

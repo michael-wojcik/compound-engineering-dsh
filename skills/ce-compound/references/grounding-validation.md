@@ -34,6 +34,8 @@ After any body edit from this step or Step 2, re-run the script until it reports
 
 ## Step 2: Semantic validator subagent (Full and non-interactive; skipped in lightweight)
 
+**On DeepSeek Harness**, a dispatch whose model does not actually differ from the session model is an Agent Teams teammate, per the `ce-dsh-host` skill's dispatch protocol. Where this file requires a genuinely different model for the agent, a teammate cannot carry that override: use the `workflow` tool's `agent(prompt, { provider, model })`, and treat the tier as unavailable when only one provider is configured. When that skill is not installed, follow this file unchanged.
+
 Dispatch **one generic read-only subagent** covering the written solution doc plus any `CONCEPTS.md` entries added or edited this run. Phase 2.4's entries are claims too; a glossary entry written from a session-level summary is exactly how wrong semantics enter the vocabulary. Use the same mid-tier model class as other reviewer subagents when the platform exposes one. Build its prompt from this template:
 
 ```

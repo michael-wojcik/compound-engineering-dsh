@@ -65,6 +65,20 @@ Every check above is one I wrote, so a third round ran the claim past readers wi
 
 Two defects in the auditing tools themselves, both of which would have hidden the above indefinitely, are fixed: a launch pattern that required the agent noun adjacent to the verb, and a negation filter that discarded an entire line when it contained any negation anywhere.
 
+## 2d. Third audit round: the task surface, and a case-sensitivity bug
+
+The question "is `/lfg` using Agent Teams?" produced the most useful result of any round, and it was not about dispatch at all.
+
+`/lfg` launches no agent: its eleven files contain zero launch instructions. It resolves and invokes other CE skills, and each of those carries its own binding — so a live run does use teammates, through its callees. The adapter had claimed `lfg` as a consumer, which was the inverse error; that is fixed and guarded.
+
+What the question exposed is that the **task surface** had never been audited. CE skills say "use the platform's task-tracking capability" and, on Claude Code, name `TaskCreate` / `TaskUpdate` / `TaskList` — tools that do not exist here. Eleven sites across ten skills prescribed it with no binding. The adapter now separates the two mechanisms (`todo_write` for the session's user-visible list, `team_task_*` for teammates' work items, and why mixing them loses either the board's wake behaviour or the user-visible view), and all eleven sites carry the mapping.
+
+The independent verifier that did report found two further unbound launch sites — `ce-retune/references/cut-passes.md` (the Phase 4 per-unit dispatch, reached from `SKILL.md:40`) and `ce-ideate/references/post-ideation-workflow.md` plus `universal-ideation.md` (the basis verifier) — and one over-bound file, a persona prompt payload carrying a task binding it had no business carrying.
+
+**Why they were missed is a tool defect, and the most important finding of the round.** The launch pattern was case-sensitive, so sentence-initial imperatives — "Dispatch one agent per unit", "Spawn a single subagent" — never matched anything. Both audits had been blind to the most common way CE writes a launch instruction. With `-i` added, the four files the new vacuous-binding guard flagged turn out to be genuine launch sites, and the check passes cleanly.
+
+Two guards were added: a consumer-list check that fails when the adapter's claimed skills and the files carrying a binding disagree, and a vacuous-binding check that fails when a file claims "every agent this file dispatches" but contains no launch instruction. The coverage tool now prints every candidate line per file rather than the first, because triage by first match is what let `cut-passes.md` pass review unbound.
+
 ## 3. Repository gates
 
 - `bun run release:validate` — passes: "0 agents, 36 skills, 0 MCP servers". The plugin inventory is untouched because the binding lives outside `skills/`.
