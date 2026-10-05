@@ -27,6 +27,8 @@ This path works with any ref — a SHA, `origin/main`, a branch name. Callers re
 
 Do **not** check out the PR branch. Scope comes from GitHub read APIs plus optional local alignment when HEAD already matches the PR head branch.
 
+**On DeepSeek Harness**, a dispatch whose model does not actually differ from the session model is an Agent Teams teammate, per the `ce-dsh-host` skill's dispatch protocol. Where this file requires a genuinely different model for the agent, a teammate cannot carry that override: use the `workflow` tool's `agent(prompt, { provider, model })`, and treat the tier as unavailable when only one provider is configured. When that skill is not installed, follow this file unchanged.
+
 **Skip-condition pre-check.** Before scope detection, run a PR-state probe:
 
 ```

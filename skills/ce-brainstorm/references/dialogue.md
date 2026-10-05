@@ -34,7 +34,7 @@ SCRATCH_DIR="$SCRATCH_ROOT/ce-brainstorm/<run-id>";
 echo "$SCRATCH_DIR";
 ```
 
-**On DeepSeek Harness**, every agent this file dispatches is spawned as an Agent Teams teammate: load the `ce-dsh-host` skill and follow its dispatch protocol — one shared task per dispatch, one teammate per agent, collected in this turn with bounded waits, with the artifact still the fact the merge reads. When that skill is not installed, follow this file unchanged.
+**On DeepSeek Harness**, this scout is spawned as an Agent Teams teammate: load the `ce-dsh-host` skill and follow its dispatch protocol — one shared task, one teammate, with the artifact still the fact the merge reads. It is the one CE dispatch legitimately collected across a turn boundary: spawn it, put the opening questions to the user, and collect it with bounded waits when the answer returns, which is what the no-wait rule below requires. When that skill is not installed, follow this file unchanged.
 
 Then dispatch one extraction-tier sub-agent via the platform's subagent primitive where available (a Task/Agent-style dispatch on harnesses that expose one); otherwise run the work inline or serially. In harnesses that support background dispatch, proceed to Phase 1.2/1.3 **without waiting**: the scout runs during the user's think-time on the opening questions. Hand the prompt the `roots` from Pack discovery; when there are none (no `packs:` key, or packs unresolved this run), omit its pack sentence entirely. Scout prompt:
 

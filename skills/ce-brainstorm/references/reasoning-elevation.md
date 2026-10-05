@@ -20,7 +20,7 @@ If the session model already **is** the resolved model, there is nothing to elev
 
 ## Adapter selection
 
-**On DeepSeek Harness**, reach this peer through an Agent Teams teammate when its model comes from an external CLI — the teammate runs the CLI and reports, and the diversity is the CLI's. A peer that must instead run in-harness on a second configured provider cannot be a teammate, because a teammate runs the session model: use the `workflow` tool's `agent(prompt, { provider, model })`, and treat the route as unavailable when only one provider is configured. The `ce-dsh-host` skill carries both shapes. When that skill is not installed, follow this file unchanged.
+**On DeepSeek Harness**, an elevated call whose model does not actually differ from the session model is an Agent Teams teammate, per the `ce-dsh-host` skill's dispatch protocol. Where the model must genuinely differ, a teammate cannot carry that override: use the `workflow` tool's `agent(prompt, { provider, model })`, or the CLI adapter this file defines, which is a detached job rather than a subagent. When that skill is not installed, follow this file unchanged.
 
 When elevation is active, resolve an adapter in this fixed order and use the first that serves the requested model:
 

@@ -23,7 +23,7 @@ Invocation authorizes scoped reading, candidate and judge delegation through ava
 
 Before dispatch, announce that a **Bake-off** is happening to explore multiple approaches to the subject and choose the strongest. If the caller already announced that, do not repeat it. No candidate preview is required. Updates help the user follow the decision. At meaningful boundaries, say what was learned, what changed, or what happens next. During a long wait, give an update when it adds useful information about progress or expectations; do not repeat that you are still waiting. Keep operational bookkeeping in the run record unless it changes expectations or explains a limitation. Do not end the turn on work merely described.
 
-**On DeepSeek Harness** this dispatch is an Agent Teams teammate; the `ce-dsh-host` skill carries the protocol.
+**On DeepSeek Harness** these dispatches are Agent Teams teammates; where a candidate's model must genuinely differ, use the `workflow` tool's `provider` and `model` overrides instead. The `ce-dsh-host` skill carries both.
 
 Read `references/candidates.md` before dispatch. It defines fresh-context payloads, model handoff, scratch isolation, and candidate completion. Launch independent work together where capacity permits; serialize only dependencies or capacity-limited launches.
 

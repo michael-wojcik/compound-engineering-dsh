@@ -70,7 +70,9 @@ while IFS= read -r f; do
   is_prompt_asset "$f" && continue
   grep -q "ce-dsh-host" "$f" && continue
   # A line that forbids or avoids a dispatch is a mention, not a launch site.
-  hits="$(grep -nE "$DISPATCH_RE" "$f" | grep -vEi "(do not|don't|never|without|rather than|instead of|temptation to|no subagents|skips)" || true)"
+  # The negation must sit next to the verb: matching it anywhere on the line hid
+  # a real launch whose line happened to contain an unrelated "without".
+  hits="$(grep -nE "$DISPATCH_RE" "$f" | grep -vEi "(do not|don't|never|without|rather than|instead of|temptation to|no subagents|skips)[a-z ]{0,12}(spawn|dispatch|launch|delegate)" || true)"
   if [[ -z "$hits" ]]; then
     mentions=$((mentions + 1))
     continue

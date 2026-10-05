@@ -1,6 +1,6 @@
 ### Stage 4: Spawn sub-agents
 
-**On DeepSeek Harness**, every reviewer below is spawned as an Agent Teams teammate: load the `ce-dsh-host` skill and follow its dispatch protocol — one shared task per reviewer, one teammate per reviewer, collected in this turn with repeated bounded `wait_agent` calls, with the artifact still the fact the merge reads and a launch that never reports recorded as a failed reviewer. The collection rules below then read those outcomes. If `ce-dsh-host` is not installed in this session, follow the rules below unchanged.
+**On DeepSeek Harness**, a dispatch whose model does not actually differ from the session model is an Agent Teams teammate, per the `ce-dsh-host` skill's dispatch protocol. Where this file requires a genuinely different model for the agent, a teammate cannot carry that override: use the `workflow` tool's `agent(prompt, { provider, model })`, and treat the tier as unavailable when only one provider is configured. When that skill is not installed, follow this file unchanged.
 
 #### Inline fast pass (emit before the reviewer queue)
 

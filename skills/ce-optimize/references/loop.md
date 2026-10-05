@@ -19,7 +19,7 @@ The next action is the cheapest executable step that would change what gets impl
 
 Do not treat the implementation backlog as empty, and do not proceed to wrap-up, while a cheaper locating measurement can still be taken and would change whether a hypothesis is kept or skipped. If such a measurement would change that decision but cannot be obtained, wrap up and say what blocked it. Do not implement without that measurement.
 
-**On DeepSeek Harness**, every agent this file dispatches is spawned as an Agent Teams teammate: load the `ce-dsh-host` skill and follow its dispatch protocol — one shared task per dispatch, one teammate per agent, collected in this turn with bounded waits, with the artifact still the fact the merge reads. When that skill is not installed, follow this file unchanged.
+**On DeepSeek Harness**, the subagents this file dispatches are Agent Teams teammates: load the `ce-dsh-host` skill and follow its dispatch protocol — one shared task per dispatch, one teammate per agent, collected in this turn with bounded waits, with the artifact still the fact the merge reads. The Codex-backend experiment this file stages is a shell pipeline rather than a subagent dispatch and stays as written. When that skill is not installed, follow this file unchanged.
 
 Optionally read `references/agents/repo-research-analyst.md` and dispatch a generic subagent seeded with that local prompt for deeper codebase analysis if the scope is large or unfamiliar. Do not dispatch a standalone agent by type/name. Pass the active project and optimization context, request only question-specific scopes such as `patterns`, and go directly to current owning code. If the optimization cannot be scoped, allow one targeted root or workspace probe.
 

@@ -8,7 +8,7 @@ The skill body's interaction rule decides whether a question is needed. When it 
 
 ## Model tiers
 
-**On DeepSeek Harness**, every agent this file dispatches is spawned as an Agent Teams teammate: load the `ce-dsh-host` skill and follow its dispatch protocol — one shared task per dispatch, one teammate per agent, collected in this turn with bounded waits, with the artifact still the fact the merge reads. When that skill is not installed, follow this file unchanged.
+**On DeepSeek Harness**, a dispatch whose model does not actually differ from the session model is an Agent Teams teammate, per the `ce-dsh-host` skill's dispatch protocol. Where this file requires a genuinely different model for the agent, a teammate cannot carry that override: use the `workflow` tool's `agent(prompt, { provider, model })`, and treat the tier as unavailable when only one provider is configured. When that skill is not installed, follow this file unchanged.
 
 Dispatch is tiered by task shape, never hardcoded to a model name:
 

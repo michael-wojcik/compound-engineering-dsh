@@ -10,7 +10,7 @@ Use the best authorized route that fits the remaining budget; a missing preferre
 
 ## Assessment and reconciliation
 
-**On DeepSeek Harness**, every agent this file dispatches is spawned as an Agent Teams teammate: load the `ce-dsh-host` skill and follow its dispatch protocol — one shared task per dispatch, one teammate per agent, collected in this turn with bounded waits, with the artifact still the fact the merge reads. When that skill is not installed, follow this file unchanged.
+**On DeepSeek Harness**, a dispatch whose model does not actually differ from the session model is an Agent Teams teammate, per the `ce-dsh-host` skill's dispatch protocol. Where this file requires a genuinely different model for the agent, a teammate cannot carry that override: use the `workflow` tool's `agent(prompt, { provider, model })`, and treat the tier as unavailable when only one provider is configured. When that skill is not installed, follow this file unchanged.
 
 Dispatch after candidate artifacts are complete. Supply the common brief, criteria, complete candidates under neutral artifact labels, and source pointers within the permitted read scope. Withhold the coordinator's ranking and other judges' conclusions. The judge is read-only and returns its POV without a follow-up menu or downstream action. Supply access to the actual `ce-pov` skill and its references through the host's skill mechanism or current files; a role label alone does not invoke it. POV owns any grounding delegation it requires. Request a single POV, without a peer consultation summons, for the default assessment.
 

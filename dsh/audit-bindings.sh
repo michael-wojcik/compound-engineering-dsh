@@ -20,8 +20,10 @@ ANALYZER='each analyzer is spawned'
 SHORT='this dispatch is an Agent Teams teammate'
 PEER='reach this peer through an Agent Teams teammate'
 TIER='a dispatch whose model does not actually differ'
-LAUNCH_RE='(spawn|dispatch|launch)[a-z]* (a|an|the|each|one|its|every|two|both)? ?(generic )?(sub-?agent|reviewer|analyst|researcher|historian|leaf|peer|worker|scout|candidate|baker|validator)'
-NEGATE_RE='(do not|don.t|never|without|rather than|instead of|temptation to|no subagents|skips)'
+LAUNCH_RE='(spawn|dispatch|launch|delegate)[a-z]* ((a|an|the|each|one|its|every|two|both) )?([a-z][a-z-]* ){0,3}(sub-?agent|agent|reviewer|analyst|researcher|historian|leaf|leaves|peer|worker|scout|candidate|baker|validator)'
+# The negation must sit next to the verb. Matching it anywhere on the line hid a
+# real launch ("spawn a lightweight sub-agent ... without a full review").
+NEGATE_RE='(do not|don.t|never|without|rather than|instead of|temptation to|no subagents|skips)[a-z ]{0,12}(spawn|dispatch|launch|delegate)'
 
 echo "1. COMPLETENESS — every file discussing DeepSeek Harness routes to the adapter"
 count=0

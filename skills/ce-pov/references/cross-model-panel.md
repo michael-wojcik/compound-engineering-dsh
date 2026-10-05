@@ -39,16 +39,11 @@ not present it as different-model corroboration. If the host family is unknown,
 automatic discovery excludes any candidate whose independence cannot be
 verified rather than guessing.
 
-**DeepSeek Harness route.** A cross-model peer is dispatched as an Agent Teams
-teammate like every other CE dispatch: the teammate runs the external CLI above
-and reports, and the model diversity comes from that CLI rather than from the
-teammate. The one peer a teammate cannot host is one that must run in-harness on
-a second configured provider, because a teammate runs the session model; that
-case takes the `workflow` tool's `agent(prompt, opts)` with its independent
-`provider` and `model` overrides, and is unavailable when only one provider is
-configured. The `ce-dsh-host` skill carries both shapes. A re-run of the host's
-own model is still not a peer — it cannot pass the independence test above, so
-never present it as one.
+**DeepSeek Harness route.** This peer is not a subagent dispatch: it stays the
+detached CLI job this file defines, with its job id, reaping, and outcome
+contract unchanged. A re-run of the host's own model is still not a peer — it
+cannot pass the independence test above, so never present it as one. The
+`ce-dsh-host` skill's dispatch protocol governs any subagent work on this path.
 
 Attest the host harness and its serving family as two separate tokens:
 

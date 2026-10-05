@@ -52,7 +52,7 @@ loop:
 
 - A teammate still running when the bound passes is stopped with `interrupt_agent` and recorded as a failed dispatch under the calling skill's own degraded-coverage rules. It cannot be deleted, so it stays listed; that is expected.
 - A teammate that reports but whose artifact is missing is collected with the missing artifact noted, because the merge reads artifacts and degrades to the compact return.
-- Never end the turn to await a dispatch. The waits are in-turn; a turn that ends on "still waiting" is the failure CE names explicitly.
+- Never end the turn to await a dispatch. The waits are in-turn; a turn that ends on "still waiting" is the failure CE names explicitly. The one licensed exception is a dispatch the calling skill deliberately runs across the user's think-time — `ce-brainstorm`'s opening scout. There the turn ends on a question to the user, not on waiting, and the collection happens when the answer returns.
 
 ## Fallback ladder
 
