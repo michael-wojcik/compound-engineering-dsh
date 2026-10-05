@@ -18,6 +18,8 @@ Parse the arguments you were invoked with: a PR number, a branch name, or blank 
 
 ### Resumability (stop and return at any point)
 
+**On DeepSeek Harness**, the task surface is `todo_write`: publish this view there and keep it current. The Agent Teams shared board is separate and carries the work items of any teammates this run dispatches; the `ce-dsh-host` skill maps both.
+
 This workflow is designed to be interrupted and resumed. Two pieces of state make that safe:
 
 - **The task list** (the harness's task tool — `TaskCreate`/`TaskUpdate` on Claude Code, `update_plan` on Codex, or the equivalent elsewhere) is the live to-do — one task per matrix scenario. Mark each `in_progress` when you start it and `completed` only when it genuinely passes.

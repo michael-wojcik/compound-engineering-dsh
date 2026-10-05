@@ -8,6 +8,8 @@ Repo-local implementation writes require a writable checkout. Before treating th
 
 ## Prepare the Work
 
+**On DeepSeek Harness**, the task surface is `todo_write`: publish this view there and keep it current. The Agent Teams shared board is separate and carries the work items of any teammates this run dispatches; the `ce-dsh-host` skill maps both.
+
 1. **Read Plan and Clarify** _(skip for a bare prompt)_ — read `references/work-intake.md` for how to size the read, what to pull from the plan, and when to stop and ask. Treat the plan as a decision artifact, not an execution script: ask anything unclear before implementing rather than after. **Do not edit the plan body during execution** — progress lives in git commits and the task tracker, and legacy `- [ ]` / `- [x]` marks or a `status:` field are not state.
 
 2. **Setup Environment**

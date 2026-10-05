@@ -171,4 +171,6 @@ Every later boundary is the same call with `--end <stage> --start <stage>` in on
 
 ## Task Visibility
 
+**On DeepSeek Harness**, the task surface is `todo_write`: publish this view there and keep it current. The Agent Teams shared board is separate and carries the work items of any teammates this run dispatches; the `ce-dsh-host` skill maps both.
+
 For the multi-agent path, once the review scope is resolved, use the platform's task-tracking capability when available to show a short user-facing view derived from the execution spine. Track review outcomes, not individual personas, setup mechanics, or tool calls; add conditional work only when its condition is met, and update the view at meaningful transitions. If no task-tracking capability is available, continue with the normal progress and final report without simulating a task list in chat.

@@ -34,6 +34,8 @@ Read this when Phase 0 classifies a bare prompt, and again at Phase 1 before rea
 
 ## Create the task list
 
+**On DeepSeek Harness**, the task surface is `todo_write`: publish this view there and keep it current. The Agent Teams shared board is separate and carries the work items of any teammates this run dispatches; the `ce-dsh-host` skill maps both.
+
 - Use the platform's task-tracking capability when available (`TaskCreate`/`TaskUpdate`/`TaskList` in Claude Code, `update_plan` in Codex, or the equivalent on other harnesses) to break the plan into actionable tasks. If none is available, continue normally without simulating a task list in chat
 - Derive tasks from the plan's implementation units, dependencies, files, test targets, and verification criteria
 - When the plan defines U-IDs for Implementation Units, name each task from a brief, outcome-led form of the unit's Goal and append the stable U-ID (e.g., "Add parser coverage (U3)"). Never use a bare U-ID or lead with the identifier; the user should understand the work before the traceability label. Aim for five words or fewer before the ID

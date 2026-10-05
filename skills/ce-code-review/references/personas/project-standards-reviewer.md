@@ -16,6 +16,8 @@ Within each criteria file you read, identify which sections apply to the file ty
 
 ## What you're hunting for
 
+**On DeepSeek Harness**, the task surface is `todo_write`: publish this view there and keep it current. The Agent Teams shared board is separate and carries the work items of any teammates this run dispatches; the `ce-dsh-host` skill maps both.
+
 The shapes below are examples of how a written rule gets violated, drawn from an agent-skills repository. They are not the criteria. The criteria are whatever the discovered files state, so a repository whose rules cover none of these shapes is reviewed against its own rules and not against this list.
 
 - **YAML frontmatter violations** -- missing required fields (`name`, `description`), description values that don't follow the stated format ("what it does and when to use it"), names that don't match directory names. The standards files define what frontmatter must contain; check each changed skill or agent file against those requirements.

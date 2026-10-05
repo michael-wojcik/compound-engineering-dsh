@@ -98,7 +98,7 @@ fails=$((fails + missing))
 
 echo
 echo "5. CONSUMER LIST — the adapter names exactly the skills that carry a binding"
-claimed="$(sed -n '/Consumers are the CE skills that carry a binding/,/audit-bindings.sh/p' "$ADAPTER/SKILL.md" | grep -oE '`ce-[a-z-]+`' | tr -d '`' | sort -u)"
+claimed="$(sed -n '/Consumers are the CE skills that carry a binding/,/audit-bindings.sh/p' "$ADAPTER/SKILL.md" | grep -oE '`(ce-[a-z-]+|lfg)`' | tr -d '`' | sort -u)"
 actual="$(for d in "$SKILLS_DIR"/*/; do n="$(basename "$d")"; grep -rq 'ce-dsh-host' "$d" 2>/dev/null && echo "$n"; done | sort -u)"
 if [[ "$claimed" == "$actual" ]]; then
   echo "   ok: $(printf '%s\n' "$actual" | grep -c .) skills claimed and bound, and no others"

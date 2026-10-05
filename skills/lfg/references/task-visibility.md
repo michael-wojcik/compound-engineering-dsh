@@ -1,5 +1,7 @@
 # Task visibility, narration, and completion
 
+**On DeepSeek Harness**, the task surface is `todo_write`: publish this view there and keep it current. The Agent Teams shared board is separate and carries the work items of any teammates this run dispatches; the `ce-dsh-host` skill maps both.
+
 Before step 1, use the platform's task-tracking capability when available to publish a short stage-level view of the remaining pipeline. Derive it from the user-meaningful outcomes of LFG's steps rather than mirroring all ten steps or exposing internal checks. Before invoking a child skill, replace or clear LFG's view so only the child skill's task surface is visible; after it returns, recreate or refresh LFG's remaining pipeline work before invoking the next child. Add a conditional step only when its condition is actually met. If no task-tracking capability is available, continue normally without simulating a task list in chat.
 
 ## Chat narration

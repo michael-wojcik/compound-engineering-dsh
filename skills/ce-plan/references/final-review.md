@@ -97,6 +97,8 @@ Plan written to <absolute path to plan>
 
 #### 5.3 Confidence Check and Deepening
 
+**On DeepSeek Harness**, the task surface is `todo_write`: publish this view there and keep it current. The Agent Teams shared board is separate and carries the work items of any teammates this run dispatches; the `ce-dsh-host` skill maps both.
+
 A deepen run enters here from Phase 0.1 without passing intake. For a material Durable run, use the host's task-tracking capability when available to show route-level outcomes and meaningful transitions; if unavailable, continue without simulating it in chat.
 
 Auto mode is the default during plan generation and synthesizes subagent findings directly into the plan. Interactive mode is activated by the Phase 0.1 re-deepen fast path and presents each finding for the user to accept or reject. Pipeline runs always use auto mode.

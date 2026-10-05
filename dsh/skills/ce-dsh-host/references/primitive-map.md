@@ -25,6 +25,15 @@ CE prose names capabilities, not tools. In this harness they are:
 - **`write_scopes` are workspace-relative.** An artifact outside the workspace cannot be declared as a scope.
 - **No model override.** A teammate runs the session model. This is the only reason a dispatch ever leaves the teammate rung.
 
+## The task surface is two things, not one
+
+CE skills say "use the platform's task-tracking capability when available" and, on Claude Code, name `TaskCreate` / `TaskUpdate` / `TaskList`. Those tools do not exist here. This harness has two distinct task mechanisms and they are not interchangeable:
+
+- **`todo_write`** is the session's task list, visible to the user. It is where a pipeline or stage-level view belongs — `lfg`'s stage view, `ce-plan`'s route-level outcomes, `ce-work`'s unit list, and a skill's own progress display.
+- **`team_task_create` / `team_task_update` / `team_task_list`** are the Agent Teams shared board. It carries the work items of the *teammates* a dispatch creates, and it is what `wait_agent` wakes on. A teammate listing or claiming its task uses this board.
+
+Publishing the pipeline view on the board would mix a stage view with teammate work items, and publishing teammate work items on `todo_write` would lose the board's dependency and wake behaviour. Keep them apart.
+
 ## Collection
 
 A launch is collected when its terminal outcome is in hand. Per primitive:

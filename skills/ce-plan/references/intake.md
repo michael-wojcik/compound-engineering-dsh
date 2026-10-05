@@ -141,6 +141,8 @@ Classify the work into one of these plan depths:
 
 If depth is unclear, ask one targeted question and then continue.
 
+**On DeepSeek Harness**, the task surface is `todo_write`: publish this view there and keep it current. The Agent Teams shared board is separate and carries the work items of any teammates this run dispatches; the `ce-dsh-host` skill maps both.
+
 For a material Durable run, use the host's task-tracking capability when available to show route-level outcomes and meaningful transitions. If unavailable, continue without simulating it in chat.
 
 #### 0.7 Solo-Mode Scoping Synthesis
