@@ -48,6 +48,23 @@ The audit also found a defect in the earlier shape of `execution-engines.md`: th
 
 Every check in this repository is heuristic, and two of them were wrong before this round — `check-coverage.sh` under-reported, and the first version of `audit-bindings.sh` aborted silently on a `pipefail` interaction and printed nothing after its second heading. Both now print their candidates for judgement rather than a single number.
 
+## 2c. Independent adversarial verification
+
+Every check above is one I wrote, so a third round ran the claim past readers with no stake in it: three verifiers were given the skills and the instruction to falsify "every launch reaches the binding", reporting only what they could cite at `file:line`. Two returned; one returned nothing and its run settled without delivering, so the independent leg is two-thirds complete, and the one that mattered most covered the six highest-risk skills synchronously.
+
+**The claim was falsified.** What the verifiers found, and what my own gates had missed:
+
+| Finding | Why the gates missed it | Disposition |
+|---|---|---|
+| `ce-code-review/references/scope.md:39` spawns a lightweight sub-agent at Stage 1, before any bound file on that path — and prescribes a model override | The launch pattern required the agent noun adjacent to the verb, so "spawn a lightweight sub-agent" never matched; the line-level negation filter also discarded it | Bound with the split rule |
+| `ce-plan/references/universal-planning.md:41` dispatches on the non-software route, which skips every software-phase binding in that skill | Coverage is judged per skill, and this skill has three bindings elsewhere — all on the route that gets skipped | Bound at the head of the file |
+| Five files mandate a per-agent model override on the very dispatch they bind (`dispatch-reviewers.md`, `orchestration.md`, `corpus-audit.md`, `judging.md`, `ce-bakeoff/SKILL.md`) | The variant check asked whether a file discusses models, not whether it *requires* an override for the same dispatch | Plain binding replaced by the split |
+| The cross-model peer sites define the peer as a detached CLI job with a job id, reaping, and a `peer.outcome` contract | I had reasoned that a teammate can host a CLI peer; the verifiers showed the job-id contract has no referent if a teammate is the carrier | Binding rewritten: the peer is not a subagent dispatch, and the teammate protocol governs only subagent work on that path |
+| `ce-brainstorm/references/dialogue.md` requires in-turn collection, but its scout deliberately runs across the user's think-time | The contradiction is between two files I wrote | Tailored binding plus a named exception in the protocol |
+| `ce-optimize/references/loop.md` binds a file that also stages a `codex exec` shell pipeline | Same reasoning error as the peer sites | Binding now separates the subagent dispatch from the pipeline |
+
+Two defects in the auditing tools themselves, both of which would have hidden the above indefinitely, are fixed: a launch pattern that required the agent noun adjacent to the verb, and a negation filter that discarded an entire line when it contained any negation anywhere.
+
 ## 3. Repository gates
 
 - `bun run release:validate` — passes: "0 agents, 36 skills, 0 MCP servers". The plugin inventory is untouched because the binding lives outside `skills/`.
