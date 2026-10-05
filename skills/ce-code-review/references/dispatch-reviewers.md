@@ -1,5 +1,7 @@
 ### Stage 4: Spawn sub-agents
 
+**On DeepSeek Harness**, load the `ce-dsh-host` skill and use its reviewer fan-out recipe: one blocking `workflow` call with `parallel()` and a projected per-agent schema collects the whole batch in this turn, keeps every artifact file as the fact the merge reads, and reports a failed agent as `null` rather than as a reviewer that never launched. The collection rules below then read that returned array. If `ce-dsh-host` is not installed in this session, follow the rules below unchanged.
+
 #### Inline fast pass (emit before the reviewer queue)
 
 To show findings within seconds, the orchestrator does a quick first-principles scan of the diff it already holds **immediately before the first foreground reviewer dispatch**. Emit the fast-pass block as text, then begin the deterministic reviewer queue without an intervening wait.

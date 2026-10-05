@@ -39,6 +39,14 @@ not present it as different-model corroboration. If the host family is unknown,
 automatic discovery excludes any candidate whose independence cannot be
 verified rather than guessing.
 
+**DeepSeek Harness native route.** A peer can run in-harness instead of through
+an external CLI: the `workflow` tool's `agent(prompt, opts)` takes independent
+`provider` and `model` overrides, and the peer's identity is what that override
+names. The `ce-dsh-host` skill carries the call shape. This route serves a peer
+only when a second provider is configured; with one provider it is unavailable
+and the external routes above remain. A re-run of the host's own model is not a
+peer — it cannot pass the independence test above, so never present it as one.
+
 Attest the host harness and its serving family as two separate tokens:
 
 ```bash

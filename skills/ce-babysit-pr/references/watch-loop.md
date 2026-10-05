@@ -20,6 +20,7 @@ Use the harness's tools to run the detector and wait for its output. A skill dri
 | Grok (CLI/TUI) | background `run_terminal_command` + `get_command_or_subagent_output`; `scheduler_create --durable` for a cross-session schedule | Yes via `scheduler_create --durable` (60s min, 7d) |
 | Cursor (CLI) | `Shell` background + `notify_on_output` sentinel (its `/loop` is user-typed, **not** skill-invocable) | No (session-bound) |
 | Codex (CLI) | `exec_command` to start the detector, then `write_stdin` to wait on the returned process session | No (session-bound) |
+| DeepSeek Harness | background `bash` + `job_output` with `wait: true` and a bounded timeout | No (session-bound) — `schedule_create` re-prompts the session; OS cron for a watch that must outlive it |
 
 **User-runnable resume syntax.** Whenever this reference tells the skill to print or copy a resume invocation, default to `/ce-babysit-pr <url>` and, when the run posture is not `target`, append the same `posture:stack-ready` or `posture:stack-land` token so checkpoint / durable / session re-entry keeps stack scope. Use `$ce-babysit-pr <url> [posture:…]` only when the active host is Codex or explicitly documents dollar-prefixed skill invocation. Render only the invocation as inline code and output one form only.
 
