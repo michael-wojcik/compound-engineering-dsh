@@ -39,13 +39,16 @@ not present it as different-model corroboration. If the host family is unknown,
 automatic discovery excludes any candidate whose independence cannot be
 verified rather than guessing.
 
-**DeepSeek Harness native route.** A peer can run in-harness instead of through
-an external CLI: the `workflow` tool's `agent(prompt, opts)` takes independent
-`provider` and `model` overrides, and the peer's identity is what that override
-names. The `ce-dsh-host` skill carries the call shape. This route serves a peer
-only when a second provider is configured; with one provider it is unavailable
-and the external routes above remain. A re-run of the host's own model is not a
-peer — it cannot pass the independence test above, so never present it as one.
+**DeepSeek Harness route.** A cross-model peer is dispatched as an Agent Teams
+teammate like every other CE dispatch: the teammate runs the external CLI above
+and reports, and the model diversity comes from that CLI rather than from the
+teammate. The one peer a teammate cannot host is one that must run in-harness on
+a second configured provider, because a teammate runs the session model; that
+case takes the `workflow` tool's `agent(prompt, opts)` with its independent
+`provider` and `model` overrides, and is unavailable when only one provider is
+configured. The `ce-dsh-host` skill carries both shapes. A re-run of the host's
+own model is still not a peer — it cannot pass the independence test above, so
+never present it as one.
 
 Attest the host harness and its serving family as two separate tokens:
 

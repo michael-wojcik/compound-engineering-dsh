@@ -2,77 +2,82 @@
 
 What was run against this fork, and what it found. Evidence for the claims in `README.md`.
 
-## 1. Installer behavior
+## 1. Teammate dispatch, end to end
+
+The protocol in `ce-dsh-host/references/dispatch-protocol.md` was executed before it was written down, not after. Every mechanic it prescribes was observed:
+
+| Mechanic | Observed |
+|---|---|
+| `spawn_teammate` runs agents concurrently | Two persona reviewers spawned together, both running at once |
+| A teammate reads its own persona and inputs from disk | Both read their persona file and the staged diff by path; the artifacts quote the diff lines verbatim |
+| A teammate writes the artifact | `security.json` (3,975 bytes) and `testing.json` (2,749 bytes), each with `reviewer`, `findings`, `residual_risks`, `testing_gaps` |
+| A teammate returns a compact report by message | Each sent exactly one JSON message to the lead, which arrived in the orchestrator's context |
+| `wait_agent` collects the batch | One return per report; nothing was collected from a launch acknowledgement |
+| The shared task board is real and teammate-visible | A teammate listed a task, claimed it (`ownerName` recorded), wrote its deliverable, and completed it — revision 3, status `completed` |
+| `wait_agent` wakes on board changes | The claim/complete sequence produced wakes, not only messages |
+| Terminal condition | Once nothing was running, `wait_agent` returned `noProgress` with reason `no-active-peer` immediately — the signal that any uncollected dispatch is failed |
+| Name uniqueness | A second spawn of an existing teammate name was rejected outright, so names carry a per-run suffix |
+| `write_scopes` are workspace-relative | A scope pointing outside the workspace was rejected; an out-of-workspace artifact path cannot be declared as a scope |
+
+The review produced real findings, not placeholders: a P0 IDOR (`req.query.user_id` read with no ownership check, evidence quoting the added line), plus P1/P2 testing gaps for the untested new path.
+
+## 2. Coverage of the binding
+
+`dsh/check-coverage.sh` reports, per skill, whether it stages a dispatch and whether it carries a pointer:
+
+- **36 skills scanned, 0 dispatching without the binding**, 26 pointer sites across the upstream skills.
+- Four files were deliberately *not* edited, and each is correct: `ce-compound/references/lightweight.md` (the mode launches no subagents at all), `ce-doc-review/references/subagent-template.md` and `ce-optimize/references/experiment-prompt-template.md` (prompt payloads a spawned agent receives, not launch instructions), and `ce-brainstorm/references/model-tiers.md` (tier policy for dispatches staged elsewhere — that gap was closed by binding `ce-brainstorm/references/dialogue.md`, the file that actually dispatches).
+- The check is a heuristic over the phrasings CE uses to launch an agent. It produced false negatives in both directions during this work — `ce-bakeoff` and `ce-compound-refresh` show as "no dispatch site" while carrying pointers — so it is evidence for review, not a gate on its own.
+
+No `SKILL.md` was edited. Every `SKILL.md` sits within ~140 bytes of Codex's 8000-byte prompt bound, so all bindings live in `references/`, which is also where the repository's own authoring standard puts a conditional block.
+
+## 3. Repository gates
+
+- `bun run release:validate` — passes: "0 agents, 36 skills, 0 MCP servers". The plugin inventory is untouched because the binding lives outside `skills/`.
+- The change-specific guards — `codex-skill-prompt-budget`, `skill-conventions`, `review-skill-contract`, `frontmatter`, `pov-skill-contract`, `release-metadata`, `ce-babysit-pr-contract`, `skill-shell-safety`: **714 pass, 0 fail**.
+- `bun run test` in full — **not green on this machine, and not green on a pristine checkout either.** A detached worktree of the base commit (`9af474a7`, no changes) fails 49 of 4437 tests here. The failures are dominated by `spawnSync timed out or lost child-exit` inside the python3-backed skill scripts and by fixture `git commit` errors; the repository's own `AGENTS.md` names the first as a bun defect (`oven-sh/bun#34069`), and its serial re-run for that signature did not clear them. The extra failures over baseline sit in files this change does not touch and pass on their own, though the `ce-work` unit-workspace tests take 9–26 seconds each against a 20–30 second timeout, so they sit on the boundary. Details: the same suite produced 106 failures while a reviewer fan-out ran alongside it and 79 when it ran alone.
+
+## 4. Installer behavior
 
 Run against a throwaway root. All five cases pass:
 
 | Case | Result |
 |---|---|
 | `--help` mentions an install path | Prints usage, exits 0, creates nothing |
-| `--global` | Links 37 skill bundles (36 upstream + `ce-dsh-host`) into `$DSH_HOME/skills` |
-| `--check` on a clean root | Reports 37 `ok`, exits 0 |
-| `--uninstall` with a foreign symlink present | Removes the 36 links this checkout owns, keeps the foreign one, names it on stderr |
-| `--project` from a subdirectory of a repo | Resolves the nearest `.git` ancestor, matching DSH's own project-root rule, and links there |
+| `--global` | Links 37 bundles (36 upstream + `ce-dsh-host`) |
+| `--check` on a clean root | 37 `ok`, exit 0 |
+| `--uninstall` with a foreign symlink present | Removes only the links this checkout owns, keeps and names the foreign one |
+| `--project` from a repo subdirectory | Resolves the nearest `.git` ancestor, matching DSH's own project-root rule |
 
-## 2. Repository gates
+## 5. DSH skill discovery
 
-- `bun run release:validate` — passes: "compound-engineering currently has 0 agents, 36 skills, and 0 MCP servers." The plugin inventory is unchanged because the binding lives outside `skills/`.
-- `bun run test` — **not green on this machine, and not green on a pristine checkout either.** A detached worktree of the base commit (`9af474a7`, no changes at all) fails 49 of 4437 tests here. This tree failed 79 of 4439 before the fix recorded below.
-- The failures are dominated by `spawnSync timed out or lost child-exit` inside the python3-backed skill scripts, and by `git commit -m seed` errors in test fixtures. The repository's own `AGENTS.md` names the first as a bun defect (`oven-sh/bun#34069`) and `scripts/run-tests.ts` already carries a serial re-run for exactly that signature, which did not clear them here. They are timing-sensitive: the same suite produced 106 failures when a reviewer fan-out was running alongside it and 79 when it ran alone.
-- The extra failures in this tree, beyond the baseline's, sit in test files this change does not touch — `ce-babysit-pr-snapshot`, the `ce-work` unit-workspace and fixed-write-route suites, `sweep-state`, `cline-install-skills`. They pass on their own (205 pass, 0 fail across the first batch), but the unit-workspace tests each take 9–26 seconds in this environment against a 20–30 second per-test timeout, so they sit on the boundary and flake in any full parallel run — in either tree.
-- The change-specific gates do pass, and they are the ones that read the files this change edits: `tests/codex-skill-prompt-budget.test.ts`, `tests/pov-skill-contract.test.ts`, `tests/skill-conventions.test.ts`, `tests/frontmatter.test.ts`, `tests/release-metadata.test.ts` — **552 pass, 0 fail**.
+Through DSH's own `FileSystemSkillProvider`, not a reimplementation: **37/37 discovered**, `complete: true`, **0 warnings**; 28 model-invocable and 9 `disable-model-invocation`; `ce-dsh-host` loads with its body and a resource base pointing at its own directory.
 
-## 3. DSH skill discovery
+## 6. Findings against this change, and their disposition
 
-Run through DSH's own `FileSystemSkillProvider` (from the installed `@deepseek-ai/dsh-skill-filesystem`), not a reimplementation:
-
-- `$DSH_HOME/skills`: **37/37 discovered**, `complete: true`, **0 warnings**.
-- Invocation policy honored: 28 model-invocable, 9 `disable-model-invocation` skills hidden from the model and reachable by `/name` only.
-- `ce-dsh-host` loads with its body and a resource base pointing at its own directory, so its `references/` resolve.
-- Earlier run against the unmodified upstream tree: 36/36, 0 warnings, from both the project root and the user root.
-
-## 4. Reviewer fan-out, end to end
-
-The recipe in `ce-dsh-host/references/reviewer-fanout.md` was executed as written, against **this fork's own adaptation diff** (526 lines), using two of CE's real personas — `adversarial-reviewer` and `project-standards-reviewer` — from `skills/ce-code-review/references/personas/`.
-
-| Check | Result |
-|---|---|
-| Agents launched concurrently | 2, via `parallel()` in one `workflow` call |
-| Collected in the same turn | 2/2, both non-null |
-| Schema-validated returns | Yes; every finding anchored at P1–P3 with quoted evidence |
-| Findings returned | 15 (9 adversarial, 6 project-standards) |
-| Artifacts written by the agents | `adversarial.json` (26 KB) and `project-standards.json` (24 KB), with `why_it_matters` and full evidence arrays |
-| Personas read by path | Yes — the agents read them from disk, which is what the recipe depends on |
-
-This is the important result: the binding's central claim is not just that the call shape works, but that it produces real review. It did — including findings against the binding itself, below.
-
-## 5. Findings against this change, and their disposition
-
-Every finding from that run, and what happened to it:
+Every finding from the review runs, and what happened to it.
 
 | Finding | Disposition |
 |---|---|
-| Reviewers obeying CE's compact-return contract fail the recipe's own projected schema and are recorded as failed | **Fixed.** The skeleton carried `additionalProperties: false` with a partial field list, so a correct CE return would validate as a failure and read as a failed reviewer. The schema now carries every merge-tier field, and the projection tells the reader to drop `additionalProperties` and why. |
-| `--help` walks into a global install, mutating `$DSH_HOME/skills` | **Fixed.** The help branch now exits. |
-| `--uninstall` deletes any same-named symlink, including links it never created | **Fixed.** Removal requires the link to resolve to this checkout's own source path. |
-| `--check` reports `ok` for a symlink pointing anywhere or nowhere, and always exits 0 | **Fixed.** It now distinguishes ok / stale / foreign / dangling / conflict and exits non-zero on anything but ok. |
-| `--project` links into `$PWD` while DSH scans the nearest `.git` ancestor, so skills land where DSH never looks | **Fixed.** The installer resolves the project root the way DSH does. |
-| The reviewer prompt drops scope mode, remote head ref, and PR context, so the remote scope can never activate | **Fixed.** The recipe now requires the calling skill's full review context. |
-| The fan-out omits CE's per-persona model tiering, and the binding frames model overrides as cross-model-only | **Fixed.** The recipe passes `model` per call for tiering, and the primitive map separates tiering from cross-model. |
-| Reviewer-return schema drops the merge-tier fields CE's merge consumes | **Fixed** — same defect as the first row. |
-| DSH reviewer dispatch omits the `<standards-paths>` criteria mapping | **Fixed.** The recipe instructs each agent to read the criteria files its persona names, under the calling skill's directory. |
-| DSH dispatch reads personas and run directories without resolving the artifact root | **Fixed.** The run directory resolves through the calling skill's artifact-root rules, so a relocated `docs_root` moves with it. |
-| The only claimed execution evidence is a file the change does not contain; the README points at a missing `verification.md` | **Fixed.** This file. |
-| Six shipped skill files route to `ce-dsh-host` with no fallback when the load fails | **Fixed.** The four routing sites now state the fallback; the two remaining sites are per-harness table rows that route nothing. |
-| The new skill points at another skill's files with skill-local path syntax | **Addressed.** The recipe resolves persona, scope, criteria, and schema paths from the calling skill's own directory and shows them as `skillDir + "/references/..."`, so nothing is written as a path into this skill's tree. |
-| *(found by the repository suite, not by the review batch)* The one-line addition to `ce-pov/SKILL.md` took it from 7831 to 8189 bytes, past Codex's 8000-byte per-SKILL.md bound, failing `tests/codex-skill-prompt-budget.test.ts` | **Fixed.** The binding moved into `ce-pov/references/cross-model-panel.md`, which the SKILL.md already routes readers to for panel work. `SKILL.md` is byte-identical to upstream again and the test passes. |
+| Reviewers obeying CE's compact-return contract fail the recipe's projected schema and are recorded as failed | **Fixed.** The skeleton carried `additionalProperties: false` with a partial field list, so a correct CE return validated as a failure and read as a failed reviewer. The fallback rung now carries every merge-tier field and tells the reader to drop `additionalProperties` and why. |
+| `--help` walks into a global install | **Fixed.** The help branch exits. |
+| `--uninstall` deletes any same-named symlink | **Fixed.** Removal requires the link to resolve to this checkout's own source path. |
+| `--check` reports `ok` for a symlink pointing anywhere or nowhere, and always exits 0 | **Fixed.** Distinguishes ok / stale / foreign / dangling / conflict, and exits non-zero otherwise. |
+| `--project` links into `$PWD` while DSH scans the nearest `.git` ancestor | **Fixed.** The installer resolves the project root the way DSH does. |
+| The dispatch brief drops scope mode, remote head ref, and PR context | **Fixed.** The protocol requires the calling skill's full review context. |
+| The dispatch omits per-persona model tiering | **Fixed, then superseded.** Teammates take no model override, so the protocol states that tiers which must actually differ take the `workflow` rung; the pre-change recipe's `model` per call is still recorded there. |
+| DSH dispatch omits the criteria mapping for personas that need one | **Fixed.** The brief instructs each agent to read the criteria files its persona names. |
+| Dispatch reads personas and run directories without resolving the artifact root | **Fixed.** The run directory resolves through the calling skill's artifact-root rules. |
+| The claimed execution evidence pointed at a file the change did not contain | **Fixed.** This file. |
+| Shipped skill files route to `ce-dsh-host` with no fallback when the load fails | **Fixed.** Every pointer states the fallback. |
+| The new skill points at another skill's files with skill-local path syntax | **Addressed.** The protocol resolves persona, scope, criteria, and schema paths from the calling skill's own directory. |
+| The one-line addition to `ce-pov/SKILL.md` took it past Codex's 8000-byte bound | **Fixed.** The block moved into `ce-pov/references/cross-model-panel.md`; `SKILL.md` is byte-identical to upstream. |
 
-One round was run. These fixes were not re-reviewed by a second batch, so treat the disposition column as the author's response, not as independent confirmation.
+One review round was run per recipe generation. The disposition column is the author's response, not independent confirmation. The prompt-budget regression is also a lesson about the verification itself: a targeted run of seven skill-contract files, chosen by names that looked relevant, missed a guard that measures `SKILL.md` size. Targeted subsets do not substitute for the whole gate.
 
-The prompt-budget regression is a lesson about the verification itself: a targeted run of seven skill-contract files, chosen by the names that looked relevant, missed a guard that measures `SKILL.md` size. The full suite caught it. Targeted subsets do not substitute for the whole gate.
+## 7. Not run, or unverified
 
-## 6. Not run
-
-- **The repo's fresh-agent skill eval** (`bun run test:skill-eval-pack`, and the `--arm ab` scenario packs) needs `claude` and `codex` on `PATH` and bills those products. Skip reason: no such CLI is available in this environment, and the behavior this fork changes is DSH dispatch, which those hosts cannot exercise. The DSH-side dispatch was run directly instead — section 4.
-- **Cross-model execution.** This installation has one provider configured (`deepseek-account` / `deepseek-flash`), so the override path could not be exercised end to end. The binding states the fallback and forbids presenting a same-model re-run as an independent peer.
-- **Durable teammate dispatch.** `spawn_teammate` is bound in the primitive map but no CE path was converted to it, so it carries no execution evidence here.
+- **A teammate hosting an external CLI peer.** The binding claims this shape for cross-model work, and it is sound by construction — a teammate runs a command and reports — but it was **not exercised here**. Neither peer answered: `claude -p` produced no output within 90 seconds, and `codex exec` failed with `401 Unauthorized: Could not validate your refresh token`. Both CLIs are on PATH, so this is an authentication state, not a missing dependency. Treat the claim as designed, not demonstrated.
+- **An in-harness peer on a second provider.** This installation configures one provider (`deepseek-account` / `deepseek-flash`), so the `workflow` override rung could not be exercised. This is the one dispatch the binding keeps off the teammate rung.
+- **The repository's fresh-agent skill eval** (`bun run test:skill-eval-pack`) needs `claude` and `codex` working and bills those products. Skip reason: same authentication failure as above, and the behavior this fork changes is DSH dispatch, which those hosts do not exercise. The DSH-side dispatch was run directly instead — section 1.
+- **A full-suite green run.** See section 3; the suite is not green on the untouched base commit in this environment.

@@ -63,6 +63,8 @@ PY="$(for c in python3 python py; do command -v "$c" >/dev/null 2>&1 && "$c" -c 
 
 Pass the JSON's `roots` (pack `id` + absolute `dir`, plus `url`/`ref` when git-sourced) into the Related Docs Finder's prompt; report `errors`/`warnings` once in the completion report and nowhere else. With no `packs:` key the result is empty and nothing changes. When the command yields no JSON (no interpreter, script not found, non-zero exit), packs are unresolved for this run: the finder searches `<root>/solutions/` alone, say so once in the completion report, and never stop the run for it.
 
+**On DeepSeek Harness**, every agent this file dispatches is spawned as an Agent Teams teammate: load the `ce-dsh-host` skill and follow its dispatch protocol — one shared task per dispatch, one teammate per agent, collected in this turn with bounded waits, with the artifact still the fact the merge reads. When that skill is not installed, follow this file unchanged.
+
 **Dispatch.** Launch the `Related Docs Finder` in the background and do not wait on it here. Its prompt states the problem in a few lines: what broke or what was learned, the module and file names, any error text, and the fix. Its keyword search starts from that, and it cannot see this conversation. Then start session history (the body's next step), and classify and draft while the finder and any session-history synthesis run, so the wall-clock cost is the longest of the three rather than their sum.
 
 Classify a rejected dispatch by whether an agent launched: correct a pre-launch argument rejection once, leave capacity-limited work queued, and if another launch failure survives correction, run that role in the parent context with the same contract and artifact path rather than dropping it.

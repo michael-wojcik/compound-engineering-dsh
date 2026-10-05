@@ -8,6 +8,8 @@ The skill body's interaction rule decides whether a question is needed. When it 
 
 ## Model tiers
 
+**On DeepSeek Harness**, every agent this file dispatches is spawned as an Agent Teams teammate: load the `ce-dsh-host` skill and follow its dispatch protocol — one shared task per dispatch, one teammate per agent, collected in this turn with bounded waits, with the artifact still the fact the merge reads. When that skill is not installed, follow this file unchanged.
+
 Dispatch is tiered by task shape, never hardcoded to a model name:
 
 - **Extraction tier** — the work-recap scout and each behavior-trace scout: search-and-quote work. Use the platform's cheapest capable model when the harness exposes a known override; otherwise inherit.

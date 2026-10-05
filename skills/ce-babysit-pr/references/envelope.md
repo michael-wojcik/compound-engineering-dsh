@@ -21,6 +21,8 @@ The SKILL.md boundaries are the always-loaded summary; this file is the complete
 
 **Asking the user:** When this skill says "ask the user", use the host's blocking question tool already in the current tool list (match by capability, not by a host-specific name). Presence in the current tool list is proof the tool exists; never call a user-facing question tool to discover whether it exists. If a matching tool is listed but unloaded, use the host's tool-discovery primitive to load that capability — do not search for another host's tool name. Fall back to presenting the question in the host's user-visible chat only when no such tool is in the list or a real question call errors. Never silently skip the question.
 
+**On DeepSeek Harness**, every agent this file dispatches is spawned as an Agent Teams teammate: load the `ce-dsh-host` skill and follow its dispatch protocol — one shared task per dispatch, one teammate per agent, collected in this turn with bounded waits, with the artifact still the fact the merge reads. When that skill is not installed, follow this file unchanged.
+
 **Invoking another skill:** When this skill says "invoke `ce-resolve-pr-feedback`" or "invoke `ce-debug`", use the platform's skill-invocation primitive (the `Skill` tool in Claude Code, the equivalent elsewhere). If the harness has no dedicated skill-invocation tool, dispatch a worker that loads that named skill. These are separate skills with their own engines — do not reimplement their work inline or skip them. They run non-interactively here: anything either one cannot safely decide comes back as a `needs-human` result, which you report to the user and route around (never block the loop waiting on it).
 
 ## Security

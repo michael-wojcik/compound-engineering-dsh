@@ -1,6 +1,6 @@
 # DeepSeek Harness primitive map
 
-Read this when a CE dispatch needs a primitive you have not used yet in this session, or when a launch fails.
+Read this when a dispatch needs a primitive you have not used yet in this session, or when a launch fails. The dispatch procedure itself is `references/dispatch-protocol.md`.
 
 ## Tool names
 
@@ -11,46 +11,46 @@ CE prose names capabilities, not tools. In this harness they are:
 | the platform's file-read / write / edit tool | `read`, `write`, `edit` |
 | run a command | `bash` |
 | search file contents / find files | `grep`, `glob` |
-| the harness's subagent primitive | `subagent`, or `workflow` for a batch |
-| the host's bounded in-turn wait | `subagent` with `run_in_background: false`, or the default blocking `workflow` call |
+| the host's subagent primitive | `spawn_teammate` by default; `workflow` and `subagent` on the fallback ladder |
+| the host's bounded in-turn wait | `wait_agent`, repeated back to back |
 | a durable scheduler | `schedule_create` |
 | ask the user | `ask_user_question` |
 | web fetch / search | `web_fetch`, `web_search` |
+
+## Teammate mechanics that shape a dispatch
+
+- **Lead-only.** Only the Lead can spawn. A CE skill executing inside a teammate or subagent cannot dispatch teammates.
+- **Names are permanent for the session.** A spawn with a used name is rejected outright; there is no delete. Always suffix with the run.
+- **The shared task board is durable and visible.** A teammate can list, claim, and complete tasks, and `wait_agent` wakes on board changes as well as messages. This makes the board the launch inventory that survives compaction, and `blocked_by` the place to express ordering the calling skill already defines.
+- **`write_scopes` are workspace-relative.** An artifact outside the workspace cannot be declared as a scope.
+- **No model override.** A teammate runs the session model. This is the only reason a dispatch ever leaves the teammate rung.
 
 ## Collection
 
 A launch is collected when its terminal outcome is in hand. Per primitive:
 
+- **`spawn_teammate`** — collected when the teammate's compact report message arrives or its artifact exists on disk, whichever is first, consumed once. A launch acknowledgement, a status change, or a progress update is not a result.
 - **`workflow`** — the call returns only after every agent settles, so the returned array *is* the collected batch. An agent that failed resolves to `null` in that array; a `null` is a failed reviewer, recorded as one, not a missing one.
 - **`subagent` with `run_in_background: false`** — the call's return is the outcome.
-- **`subagent` (background)** — the settle notification carries the outcome; a launch acknowledgement is not a result.
+- **`subagent` (background)** — the settle notification carries the outcome.
 - **`bash` + `run_in_background`** — `job_output` with `wait: true` blocks until the job finishes or the timeout expires. A timeout is not a result; wait again or take the failure direction.
+
+`wait_agent` returns `noProgress` with reason `no-active-peer` once nothing is running. That is the terminal check: re-list, then anything with neither report nor artifact is a failed dispatch.
 
 Misusing a `workflow` hook — a bad option, an unsupported schema keyword, a tripped cap — ends the whole script instead of returning `null`. That is a dispatch failure: record it as one, correct the script, and relaunch; do not treat the empty result as "no findings".
 
 ## Model overrides, and what "cross-model" can mean here
 
-`workflow`'s `agent(prompt, opts)` takes independent `provider` and `model` overrides. That is the native way to run CE's cross-model author, reviewer, or oracle panel, and it needs no external CLI.
+`spawn_teammate` has no `provider`/`model` parameter, so a teammate cannot be a different model. `workflow`'s `agent(prompt, opts)` can, and CE's external-CLI route does not need one at all because the peer's model comes from the CLI it runs.
 
-It requires a second provider to be configured in the DSH profile. This installation has one, so a cross-model request currently has two honest outcomes:
+So a cross-model request resolves in one of three ways, and never by re-running the session model and calling it an independent peer — CE treats peer agreement as independent evidence, and a same-model peer is not independent:
 
-- A second provider is configured: pass `{ provider, model }` and run the peer there.
-- No second provider: take CE's own fallback — the external-CLI peer path the skill already documents (`peer-job-runner.py`, `cross-model-*.sh`) — or return a blocker.
+- **External CLI peer** (CE's own cross-model route): host it *in* a teammate. The teammate runs the CLI and reports; the diversity is the CLI's.
+- **In-harness second provider**: `workflow` with `provider`/`model`. This is the one dispatch that cannot be a teammate.
+- **No second route available**: take the skill's documented fallback or return a blocker.
 
-Never satisfy a cross-model request by re-running the same model and reporting it as an independent peer. CE's promotion and oracle logic treats peer agreement as independent evidence, and a same-model peer is not independent.
+## Durable ownership
 
-## Durable work versus leaf work
+Because every dispatch is a teammate, durable ownership is available wherever the calling skill needs it: a unit implemented across turns, a long `lfg` run, an author loop the user will redirect. Use the board for the parts that must survive the turn — `team_task_create` with `write_scopes` and `blocked_by`, and `send_message` to steer a member that is still running.
 
-`spawn_teammate` creates a durable, addressable peer with a shared task board; `wait_agent` observes its status and mailbox changes. Reach for it when the work must outlive the turn and someone will steer it — a long `lfg` run, an implementation unit owned across turns, an author loop the user will redirect.
-
-Do not use it for CE's reviewer leaves. Those are short, independent, and needed this turn; `workflow` is the right shape, and a teammate adds lifecycle the reviewer never needs.
-
-## Degradation ladder
-
-Take the first rung that works and record which one you took:
-
-1. `workflow` batch with schemas.
-2. `subagent` with `run_in_background: false`, one reviewer at a time.
-3. Review inline in the orchestrator's own context.
-
-CE already governs rung 3: an inline pass is not independent, so it contributes attributed evidence but never counts as an independent reviewer, and the lost coverage is named in the result.
+`wait_agent` observes changes; it never wakes an inactive member. To resume one, `send_message` it, then wait again.

@@ -109,6 +109,8 @@ If 2-3 hypotheses are exhausted without confirmation, diagnose why and present t
 | Works locally, fails in CI/prod | Environment problem | Focus on env differences, config, dependencies, timing |
 | Fix works but prediction was wrong | Symptom fix, not root cause | The real cause is still active. Keep investigating |
 
+**On DeepSeek Harness**, every agent this file dispatches is spawned as an Agent Teams teammate: load the `ce-dsh-host` skill and follow its dispatch protocol — one shared task per dispatch, one teammate per agent, collected in this turn with bounded waits, with the artifact still the fact the merge reads. When that skill is not installed, follow this file unchanged.
+
 **Parallel investigation option:** when hypotheses are waiting on evidence from clearly independent subsystems, dispatch read-only sub-agents in parallel, each with an explicit hypothesis and a structured evidence-return format. No code edits by sub-agents; skip when hypotheses depend on each other. Without parallel dispatch, run the same probes sequentially in ranked order. The parallelism is a latency optimization, not a correctness requirement. Correct a pre-launch argument rejection once; capacity-limited work stays queued, and any other launch failure takes the sequential path.
 
 ---

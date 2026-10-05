@@ -1,6 +1,6 @@
 ### Stage 4: Spawn sub-agents
 
-**On DeepSeek Harness**, load the `ce-dsh-host` skill and use its reviewer fan-out recipe: one blocking `workflow` call with `parallel()` and a projected per-agent schema collects the whole batch in this turn, keeps every artifact file as the fact the merge reads, and reports a failed agent as `null` rather than as a reviewer that never launched. The collection rules below then read that returned array. If `ce-dsh-host` is not installed in this session, follow the rules below unchanged.
+**On DeepSeek Harness**, every reviewer below is spawned as an Agent Teams teammate: load the `ce-dsh-host` skill and follow its dispatch protocol — one shared task per reviewer, one teammate per reviewer, collected in this turn with repeated bounded `wait_agent` calls, with the artifact still the fact the merge reads and a launch that never reports recorded as a failed reviewer. The collection rules below then read those outcomes. If `ce-dsh-host` is not installed in this session, follow the rules below unchanged.
 
 #### Inline fast pass (emit before the reviewer queue)
 

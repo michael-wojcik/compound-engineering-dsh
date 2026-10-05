@@ -10,6 +10,8 @@ Use the best authorized route that fits the remaining budget; a missing preferre
 
 ## Assessment and reconciliation
 
+**On DeepSeek Harness**, every agent this file dispatches is spawned as an Agent Teams teammate: load the `ce-dsh-host` skill and follow its dispatch protocol — one shared task per dispatch, one teammate per agent, collected in this turn with bounded waits, with the artifact still the fact the merge reads. When that skill is not installed, follow this file unchanged.
+
 Dispatch after candidate artifacts are complete. Supply the common brief, criteria, complete candidates under neutral artifact labels, and source pointers within the permitted read scope. Withhold the coordinator's ranking and other judges' conclusions. The judge is read-only and returns its POV without a follow-up menu or downstream action. Supply access to the actual `ce-pov` skill and its references through the host's skill mechanism or current files; a role label alone does not invoke it. POV owns any grounding delegation it requires. Request a single POV, without a peer consultation summons, for the default assessment.
 
 Give POV the developed approach set and the decision criteria. Its evidence floors apply to shared premises as well as candidate claims. Ask it to identify dependencies whose failure would change feasibility, a required guarantee, or the ranking, and distinguish source-backed conclusions from assumptions. Candidate agreement cannot corroborate an inherited premise. Consume a blocked verdict as an unresolved evidence need, not a completed endorsement.

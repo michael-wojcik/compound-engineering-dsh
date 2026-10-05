@@ -6,6 +6,8 @@ The lens works against whichever tracker is reachable — GitHub, Linear, or Jir
 
 ## a. Scan call
 
+**On DeepSeek Harness**, every agent this file dispatches is spawned as an Agent Teams teammate: load the `ce-dsh-host` skill and follow its dispatch protocol — one shared task per dispatch, one teammate per agent, collected in this turn with bounded waits, with the artifact still the fact the merge reads. When that skill is not installed, follow this file unchanged.
+
 Read `references/agents/issue-intelligence-analyst.md` and dispatch a generic subagent seeded with that prompt, the focus hint, the `<scratch-dir>` resolved earlier in Phase 1, and the instruction that it is in **SCAN mode**.
 
 It probes tracker access, does one bounded fetch, persists that fetched set to `<scratch-dir>/issue-scan.json`, and returns the distribution, a signal count, and an ambiguity assessment. It does **not** cluster.

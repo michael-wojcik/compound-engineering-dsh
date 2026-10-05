@@ -92,6 +92,8 @@ If the fix-list is empty (all verdicts are reply/needs-human), skip steps 4-6 an
 
 ## 4. Fix (fix-list only)
 
+**On DeepSeek Harness**, every agent this file dispatches is spawned as an Agent Teams teammate: load the `ce-dsh-host` skill and follow its dispatch protocol — one shared task per dispatch, one teammate per agent, collected in this turn with bounded waits, with the artifact still the fact the merge reads. When that skill is not installed, follow this file unchanged.
+
 Dispatch fixers **only** for fix-list items. Reply-list and human-list items never reach a subagent.
 
 ### Where each fix runs

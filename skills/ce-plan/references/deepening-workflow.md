@@ -83,6 +83,8 @@ Use the plan's own `Context & Research` and `Sources & References` as evidence. 
 
 ## 5.3.4 Report and Dispatch Targeted Research
 
+**On DeepSeek Harness**, every agent this file dispatches is spawned as an Agent Teams teammate: load the `ce-dsh-host` skill and follow its dispatch protocol — one shared task per dispatch, one teammate per agent, collected in this turn with bounded waits, with the artifact still the fact the merge reads. When that skill is not installed, follow this file unchanged.
+
 Before dispatching agents, report what sections are being strengthened and why:
 
 ```text

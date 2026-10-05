@@ -92,6 +92,8 @@ Use `manual` only when you can state the missing input or consequential choice, 
 
 Use `safe_auto` for a mechanical correction with one right answer and `gated_auto` for a chosen correction that changes meaning. Step 3.7 (Route by Autofix Class) determines whether the correction may be applied. Keep prior user decisions and actual applied changes; reclassify the remaining reviewer proposals from their evidence.
 
+**On DeepSeek Harness**, every agent this file dispatches is spawned as an Agent Teams teammate: load the `ce-dsh-host` skill and follow its dispatch protocol — one shared task per dispatch, one teammate per agent, collected in this turn with bounded waits, with the artifact still the fact the merge reads. When that skill is not installed, follow this file unchanged.
+
 **Fixes found only by another model.** These never qualify for `safe_auto`. The lead may choose a supported `gated_auto` correction within the agreed outcome and constraints, but its own investigation is not independent review. When missing local corroboration is the only obstacle to an otherwise authorized, worthwhile correction, obtain the limited independent check described in `references/document-intake.md` before returning it for approval. Keep the original attribution and record any new review separately. Silent application requires that local reviewer to independently identify the same issue (R18), plus the confidence and edit-authority requirements in 3.7. Missing, failed, or disagreeing local evidence leaves the peer-only restriction in place.
 
 ### 3.7 Route by Autofix Class
