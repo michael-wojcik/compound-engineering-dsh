@@ -55,7 +55,7 @@ Misusing a `workflow` hook — a bad option, an unsupported schema keyword, a tr
 So a cross-model request resolves in one of three ways, and never by re-running the session model and calling it an independent peer — CE treats peer agreement as independent evidence, and a same-model peer is not independent:
 
 - **External CLI peer** (CE's own cross-model route): host it *in* a teammate. The teammate runs the CLI and reports; the diversity is the CLI's.
-- **In-harness second provider**: `workflow` with `provider`/`model`. This is the one dispatch that cannot be a teammate.
+- **In-harness second provider**: `workflow` with `provider`/`model`. This dispatch cannot be a teammate; the only other dispatch that leaves the rung is one issued by an agent that is not the Lead.
 - **No second route available**: take the skill's documented fallback or return a blocker.
 
 ## Durable ownership

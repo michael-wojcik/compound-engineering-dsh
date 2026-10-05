@@ -19,7 +19,7 @@ description: "Binds Compound Engineering's host-neutral dispatch language to Dee
 | A dispatch issued by an agent that is not the Team Lead | `workflow` batch, then a single `subagent` | `spawn_teammate` is Lead-only. |
 | A background shell process — the `ce-babysit-pr` detector | `bash` with `run_in_background`, then `job_output` with `wait: true` | Not a subagent dispatch; a process wait. |
 
-**The one dispatch that cannot be a teammate.** `spawn_teammate` takes no model override and a teammate runs the session model, so a peer that must run **in-harness on a second configured provider** has no teammate form; `workflow`'s `agent(prompt, { provider, model })` is the only primitive that expresses it. Two things that look like exceptions are not. A peer that runs through an external CLI — CE's own cross-model route — is hosted *by* a teammate that runs the CLI and reports, because the model diversity comes from the CLI rather than from the teammate. And per-persona model tiering still runs as teammates whenever the tiers would not actually differ.
+**A dispatch that cannot be a teammate.** `spawn_teammate` takes no model override and a teammate runs the session model, so a peer that must run **in-harness on a second configured provider** has no teammate form; `workflow`'s `agent(prompt, { provider, model })` is the only primitive that expresses it. (The other dispatches that leave the teammate rung are those issued by an agent that is not the Lead, in the table above.) Two things that look like exceptions are not. A peer that runs through an external CLI — CE's own cross-model route — is hosted *by* a teammate that runs the CLI and reports, because the model diversity comes from the CLI rather than from the teammate. And per-persona model tiering still runs as teammates whenever the tiers would not actually differ.
 
 ## Read next
 
@@ -29,6 +29,6 @@ description: "Binds Compound Engineering's host-neutral dispatch language to Dee
 
 ## Two facts that change how a dispatch is written
 
-A `workflow` script has no filesystem access, so it passes paths and the agents read them. A teammate has full tool access, so it reads its own persona file directly — pass paths, not file contents.
+A `workflow` script has no filesystem access, so it passes paths and the agents read them. A teammate has full tool access, so it reads its own persona file directly — pass paths rather than inlining content, unless the calling skill's own template inlines it as part of that skill's contract, as `ce-sweep`'s does.
 
 A teammate cannot be deleted and its name cannot be reused. Name every teammate with a per-run suffix or a second run in the same session fails to spawn.

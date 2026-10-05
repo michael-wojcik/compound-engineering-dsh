@@ -21,12 +21,39 @@ The protocol in `ce-dsh-host/references/dispatch-protocol.md` was executed befor
 
 The review produced real findings, not placeholders: a P0 IDOR (`req.query.user_id` read with no ownership check, evidence quoting the added line), plus P1/P2 testing gaps for the untested new path.
 
+## 1b. Live acceptance run (the binding, executed)
+
+The static audits cannot show that a CE skill actually reaches for the binding. This run does, in a live session.
+
+**Setup.** `dsh/install.sh --project` linked all 37 bundles into `<workspace>/.dsh/skills`. The session's skill catalog hot-refreshed within one step and listed all 36 CE skills plus `ce-dsh-host`, each with its description intact.
+
+**The chain, observed in order:**
+
+| Step | What happened |
+|---|---|
+| `skill(ce-code-review)` | Loaded through the real skill tool from the installed tree, with `Base directory for this skill: …/.dsh/skills/ce-code-review` |
+| Stage 4 | `references/dispatch-reviewers.md` line 3 carried the split binding, which orders the reader to load `ce-dsh-host` |
+| `skill(ce-dsh-host)` | Loaded through the same tool, from the same installed tree — the routing works as written |
+| Dispatch | Two shared tasks created; two teammates spawned (`ce-review-correctness-live1`, `ce-review-standards-live1`) with persona, scope-rule, diff, and artifact paths in the brief |
+| Collection | Repeated bounded `wait_agent` calls. It woke on shared-board changes (a claim) and on mailbox messages, exactly as the protocol describes; the correctness reviewer's compact return arrived before its artifact, the standards reviewer's after |
+| Collection | Both teammates claimed their task, wrote their artifact (`correctness.json` 10,260 bytes, `project-standards.json` 14,280 bytes), completed the task, and sent one compact-JSON message each |
+| Terminal | Both tasks `completed`; every launch collected in the turn that made it |
+
+**It found real defects — in the commit under review.** Six findings across the two reviewers, every `evidence[0]` verified verbatim, and the top finding was reached independently by both:
+
+- **P2, corroborated twice** — the `ce-sweep` binding seeded analyzers with persona *content* while the adapter it points at said "pass paths, not file contents"; the two cannot both be satisfied. Fixed by scoping the adapter's rule to what the calling skill's own template does.
+- **P3** — the README asserted a universal fallback clause and denied it in the same sentence; measured 44 of 62. Fixed.
+- **P3** — `verification.md` both misdescribed which 18 bindings lack the clause and still quoted a stale 46. Fixed.
+- **P3** — the README's "the only dispatch that leaves the teammate rung" survived the identical fix applied to `primitive-map.md`, and the same overstatement sat in the adapter's `SKILL.md` and `primitive-map.md`. All three fixed.
+
+**Not exercised:** Stages 5 and 6 (the merge leaf, validator, and report leaf). The dispatch binding is proven at Stage 4 and in the peer and task bindings; the leaf path uses the same primitive, but it has not been run.
+
 ## 2. Coverage of the binding
 
 `dsh/check-coverage.sh` reports two levels: skill level is a gate, file level is evidence for review.
 
 - **Skill level: 36 skills scanned, 0 gaps.** Every skill that stages a dispatch carries the binding somewhere.
-- **46 files carry a binding**: 41 in six reusable variants matched to what the site does (28 standard, 2 for the batches that name their own agents, 5 cross-model peer, 3 per-agent tier, 3 short-form), plus 5 tailored to their site — the watch's process rule, an inline entry in `ce-doc-review`'s host list, the wrapped peer panel in `ce-pov`, the tier short form in `ce-simplify-code`, and the engine paragraph in `ce-work`.
+- **62 files carry a binding**, in the variants `dsh/check-coverage.sh` reports; the adapter's consumer list names the 21 skills they belong to, and `dsh/audit-bindings.sh` fails when that list and the tree disagree. Earlier rounds of this document quoted 26, then 41, then 46 — each was an under-count produced by a tool defect recorded in §2b and §2d, which is why the counts now live in the scripts rather than here.
 - **File level: 19 files still match dispatch language with no in-file pointer, and none is an unbound launch site.** Two are prompt templates a spawned agent receives; three are `SKILL.md` files that route to a bound reference; one is the `ce-babysit-pr` detector, which is a process rather than a subagent; the rest state a cap, a precondition, or analyze a past dispatch rather than issuing one. The script prints this list on every run so the judgement is re-checked rather than assumed.
 - The check is a heuristic, and an earlier narrow version of it was wrong. It reported "0 unbound" while `ce-retune` required two waves to run as separate dispatched agents and `ce-simplify-code` dispatched three reviewers from its `SKILL.md` — neither carried a pointer. The pattern is now deliberately broad, and the script prints its own false positives instead of hiding them behind a single number.
 - Four files were deliberately not edited, and each is correct: `ce-compound/references/lightweight.md` (the mode launches no subagents at all), `ce-doc-review/references/subagent-template.md` and `ce-optimize/references/experiment-prompt-template.md` (prompt payloads a spawned agent receives, not launch instructions), and `ce-brainstorm/references/model-tiers.md` (tier policy for dispatches staged elsewhere — closed instead by binding `ce-brainstorm/references/dialogue.md`, the file that dispatches).
@@ -39,7 +66,7 @@ On the `SKILL.md` byte budget: bindings went into `references/` wherever the rep
 
 | Check | Result |
 |---|---|
-| Does every file that discusses DeepSeek Harness route to the adapter? | 46 files mention DSH; all 46 name `ce-dsh-host`. This found one real gap: `ce-babysit-pr/references/watch-loop.md` gained a DSH table row but never routed, so the watch's own reference was unreachable from it. |
+| Does every file that discusses DeepSeek Harness route to the adapter? | 62 files mention DSH; all 62 name `ce-dsh-host` (46 at the time this check first ran). This found one real gap: `ce-babysit-pr/references/watch-loop.md` gained a DSH table row but never routed, so the watch's own reference was unreachable from it. |
 | Does each binding precede its file's first launch instruction? | 14 files carry both. Four candidates were raised and all four are descriptive lines, not launches: "The elevated steps: …" (×2), the definition of "dispatch context", and a "before dispatching subagents" precondition. |
 | Do the exception texts sit on exception sites? | 5 peer bindings and 3 tier bindings, each on a file that discusses models. One further flag is a false positive: `dispatch-reviewers.md` has a *subsection* on the cross-model pass while its own dispatch is the local batch, and the peer's files carry the exception binding. |
 | Does the adapter's own material resolve? | No citation of the removed `reviewer-fanout` reference; every `references/` file named by the adapter exists. |
@@ -117,7 +144,7 @@ Every finding from the review runs, and what happened to it.
 | DSH dispatch omits the criteria mapping for personas that need one | **Fixed.** The brief instructs each agent to read the criteria files its persona names. |
 | Dispatch reads personas and run directories without resolving the artifact root | **Fixed.** The run directory resolves through the calling skill's artifact-root rules. |
 | The claimed execution evidence pointed at a file the change did not contain | **Fixed.** This file. |
-| Shipped skill files route to `ce-dsh-host` with no fallback when the load fails | **Partly fixed, and the first claim was overstated.** 44 of the 62 bindings state the fallback; the 18 that do not are task-surface mappings and short forms, where a missing skill leaves the sentence inert rather than wrong. |
+| Shipped skill files route to `ce-dsh-host` with no fallback when the load fails | **Partly fixed, and two successive claims were overstated.** 44 of the 62 bindings state the fallback. Of the 18 that do not, most are task-surface mappings and short forms, where a missing skill leaves the sentence inert; the rest are the detached-CLI peer, panel, watch, and engine-table bindings, and one (`ce-doc-review/references/dispatch.md`) states an equivalent fallback in other words. |
 | The new skill points at another skill's files with skill-local path syntax | **Addressed.** The protocol resolves persona, scope, criteria, and schema paths from the calling skill's own directory. |
 | The one-line addition to `ce-pov/SKILL.md` took it past Codex's 8000-byte bound | **Fixed.** The block moved into `ce-pov/references/cross-model-panel.md`; `SKILL.md` is byte-identical to upstream. |
 
