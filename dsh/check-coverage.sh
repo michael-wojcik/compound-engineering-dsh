@@ -1,49 +1,99 @@
 #!/usr/bin/env bash
-# Report, per skill, whether it stages a subagent dispatch and whether it carries
-# the DeepSeek Harness binding pointer.
+# Report whether every skill that dispatches agents carries the DeepSeek Harness
+# binding, and which dispatch-bearing files still lack an in-file pointer.
 #
-# The dispatch test is a heuristic over the imperative phrasings CE uses when a
-# skill launches an agent. Prompt assets (references/personas, references/agents)
-# are excluded: they are the text a spawned agent receives, not a dispatch site.
-# A skill whose only matches are incidental ("spawn a background process") shows
-# up here as a dispatch site and needs a human read, so this is evidence for
-# review, not a gate.
+# Two levels, because they fail differently:
+#   - Skill level is a GATE. A skill that dispatches and carries no pointer
+#     anywhere exits non-zero: a run through that skill never sees the binding.
+#   - File level is EVIDENCE, not a gate. It lists dispatch-bearing files with no
+#     in-file pointer. Some are genuine unbound launch sites; others only mention
+#     a dispatch ("stop without dispatching reviewers"). A human reads the list.
+#
+# The dispatch pattern is deliberately broad. A false positive costs a review
+# line; a false negative costs an unbound launch site, which is the failure this
+# script exists to catch — an earlier narrow version reported "0 unbound" while
+# ce-retune dispatched two waves with no pointer at all.
 set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 SKILLS_DIR="$REPO_ROOT/skills"
 
-DISPATCH_RE='(spawn|dispatch|launch)[a-z]* (the |a |each |one |its |every |all |two )?(generic )?(sub-?agents?|reviewers?|analyzers?|leaves?|leaf|personas?|workers?|researchers?|historians?)'
+# Dispatch verbs near an agent noun, plus CE's object-less phrasings.
+DISPATCH_RE='(spawn|dispatch|launch|delegate)[a-z]*[^.]{0,60}(agent|reviewer|analyst|researcher|historian|leaf|leaves|peer|worker|scout|candidate|baker|validator)|separate dispatched agents|candidate and judge delegation'
 
-printf '%-28s %-8s %-8s %s\n' "SKILL" "DISPATCH" "BOUND" "STATUS"
-printf '%-28s %-8s %-8s %s\n' "----------------------------" "--------" "--------" "------"
+is_prompt_asset() {
+  case "$1" in
+  */personas/* | */agents/*) return 0 ;;
+  *) return 1 ;;
+  esac
+}
 
-missing=0
-total=0
+echo "SKILL LEVEL"
+printf '  %-26s %-9s %-9s %s\n' "SKILL" "DISPATCH" "POINTERS" "STATUS"
+
+unbound=0
+scanned=0
 for dir in "$SKILLS_DIR"/*/; do
   [[ -f "$dir/SKILL.md" ]] || continue
   name="$(basename "$dir")"
-  total=$((total + 1))
+  scanned=$((scanned + 1))
 
-  dispatch_files="$(grep -rlE "$DISPATCH_RE" "$dir" --include="*.md" 2>/dev/null |
-    grep -v '/personas/' | grep -v '/agents/' || true)"
-  bound_files="$(grep -rl 'ce-dsh-host' "$dir" --include="*.md" 2>/dev/null || true)"
+  filtered=""
+  while IFS= read -r f; do
+    [[ -n "$f" ]] || continue
+    is_prompt_asset "$f" || filtered="$filtered$f"$'\n'
+  done < <(grep -rlE "$DISPATCH_RE" "$dir" --include="*.md" 2>/dev/null || true)
 
-  if [[ -z "$dispatch_files" ]]; then
-    printf '%-28s %-8s %-8s %s\n' "$name" "no" "-" "n/a (no dispatch site)"
+  bound="$(grep -rl 'ce-dsh-host' "$dir" --include="*.md" 2>/dev/null || true)"
+
+  if [[ -z "${filtered//$'\n'/}" ]]; then
+    printf '  %-26s %-9s %-9s %s\n' "$name" "no" "-" "n/a"
     continue
   fi
 
-  dcount="$(printf '%s\n' "$dispatch_files" | grep -c . || true)"
-  bcount="$(printf '%s\n' "$bound_files" | grep -c . || true)"
+  dcount="$(printf '%s' "$filtered" | grep -c . || true)"
+  bcount="$(printf '%s' "$bound" | grep -c . || true)"
   if [[ "$bcount" -gt 0 ]]; then
-    printf '%-28s %-8s %-8s %s\n' "$name" "$dcount" "$bcount" "covered"
+    printf '  %-26s %-9s %-9s %s\n' "$name" "$dcount" "$bcount" "covered"
   else
-    printf '%-28s %-8s %-8s %s\n' "$name" "$dcount" "0" "MISSING"
-    missing=$((missing + 1))
+    printf '  %-26s %-9s %-9s %s\n' "$name" "$dcount" "0" "MISSING"
+    unbound=$((unbound + 1))
   fi
 done
 
 echo
-echo "skills scanned: $total, dispatching without the binding: $missing"
-exit "$missing"
+echo "FILE LEVEL — dispatch-bearing files with no in-file pointer"
+launch_unbound=0
+mentions=0
+while IFS= read -r f; do
+  [[ -n "$f" ]] || continue
+  is_prompt_asset "$f" && continue
+  grep -q "ce-dsh-host" "$f" && continue
+  # A line that forbids or avoids a dispatch is a mention, not a launch site.
+  hits="$(grep -nE "$DISPATCH_RE" "$f" | grep -vEi "(do not|don't|never|without|rather than|instead of|temptation to|no subagents|skips)" || true)"
+  if [[ -z "$hits" ]]; then
+    mentions=$((mentions + 1))
+    continue
+  fi
+  printf '  LAUNCH   %s\n' "${f#"$REPO_ROOT"/}"
+  printf '%s\n' "$hits" | head -1 | cut -c1-140 | sed 's/^/           /'
+  launch_unbound=$((launch_unbound + 1))
+done < <(grep -rlE "$DISPATCH_RE" "$SKILLS_DIR" --include="*.md" 2>/dev/null | sort)
+echo "  ($mentions further files mention a dispatch without launching one)"
+
+echo
+echo "BINDING VARIANTS IN USE"
+while IFS= read -r v; do
+  printf '  %-56s %s\n' "$v" "$(grep -rl "$v" "$SKILLS_DIR" --include="*.md" 2>/dev/null | wc -l | tr -d ' ')"
+done <<'VARIANTS'
+every agent this file dispatches is spawned
+every reviewer below is spawned
+each analyzer is spawned
+reach this peer through an Agent Teams teammate
+a dispatch whose model does not actually differ
+this dispatch is an Agent Teams teammate
+VARIANTS
+
+echo
+echo "skills scanned: $scanned, skill-level gaps: $unbound, unbound launch sites: $launch_unbound, mentions: $mentions"
+exit "$unbound"

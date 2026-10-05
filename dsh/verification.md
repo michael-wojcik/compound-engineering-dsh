@@ -23,13 +23,15 @@ The review produced real findings, not placeholders: a P0 IDOR (`req.query.user_
 
 ## 2. Coverage of the binding
 
-`dsh/check-coverage.sh` reports, per skill, whether it stages a dispatch and whether it carries a pointer:
+`dsh/check-coverage.sh` reports two levels: skill level is a gate, file level is evidence for review.
 
-- **36 skills scanned, 0 dispatching without the binding**, 26 pointer sites across the upstream skills.
-- Four files were deliberately *not* edited, and each is correct: `ce-compound/references/lightweight.md` (the mode launches no subagents at all), `ce-doc-review/references/subagent-template.md` and `ce-optimize/references/experiment-prompt-template.md` (prompt payloads a spawned agent receives, not launch instructions), and `ce-brainstorm/references/model-tiers.md` (tier policy for dispatches staged elsewhere — that gap was closed by binding `ce-brainstorm/references/dialogue.md`, the file that actually dispatches).
-- The check is a heuristic over the phrasings CE uses to launch an agent. It produced false negatives in both directions during this work — `ce-bakeoff` and `ce-compound-refresh` show as "no dispatch site" while carrying pointers — so it is evidence for review, not a gate on its own.
+- **Skill level: 36 skills scanned, 0 gaps.** Every skill that stages a dispatch carries the binding somewhere.
+- **41 binding sites**, in six variants matched to what the site does: 28 standard (a same-model dispatch), 2 for the reviewer and analyzer batches that name their own agents, 5 cross-model peer sites, 3 per-agent model-tier sites, and 3 short-form sites inside `SKILL.md` files where bytes are tight.
+- **File level: 19 files still match dispatch language with no in-file pointer, and none is an unbound launch site.** Two are prompt templates a spawned agent receives; three are `SKILL.md` files that route to a bound reference; one is the `ce-babysit-pr` detector, which is a process rather than a subagent; the rest state a cap, a precondition, or analyze a past dispatch rather than issuing one. The script prints this list on every run so the judgement is re-checked rather than assumed.
+- The check is a heuristic, and an earlier narrow version of it was wrong. It reported "0 unbound" while `ce-retune` required two waves to run as separate dispatched agents and `ce-simplify-code` dispatched three reviewers from its `SKILL.md` — neither carried a pointer. The pattern is now deliberately broad, and the script prints its own false positives instead of hiding them behind a single number.
+- Four files were deliberately not edited, and each is correct: `ce-compound/references/lightweight.md` (the mode launches no subagents at all), `ce-doc-review/references/subagent-template.md` and `ce-optimize/references/experiment-prompt-template.md` (prompt payloads a spawned agent receives, not launch instructions), and `ce-brainstorm/references/model-tiers.md` (tier policy for dispatches staged elsewhere — closed instead by binding `ce-brainstorm/references/dialogue.md`, the file that dispatches).
 
-No `SKILL.md` was edited. Every `SKILL.md` sits within ~140 bytes of Codex's 8000-byte prompt bound, so all bindings live in `references/`, which is also where the repository's own authoring standard puts a conditional block.
+On the `SKILL.md` byte budget: bindings went into `references/` wherever the repository's layout allowed. Three `SKILL.md` files took a short-form pointer and stay under Codex's 8000-byte bound — `ce-bakeoff` (7705), `ce-resolve-pr-feedback` (6859), `ce-simplify-code` (6989). `ce-explain` was already over that bound and inside the repository's own ratchet set before this change; its one dispatch site took a short-form clause and it stays in that set at 8785 bytes, which the guard tolerates because membership is a set rather than a size pin.
 
 ## 3. Repository gates
 

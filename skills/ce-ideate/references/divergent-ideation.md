@@ -2,6 +2,8 @@
 
 Read this file at the start of Phase 2 — after Phase 1 grounding and any Phase 1.5 evidence scouts complete, and before building any ideation dispatch prompt. It defines the ideation fleet, the dispatch payload, the frames, the per-idea output contract, and the post-merge synthesis steps. Model tier names (extraction / generation / ceiling) are defined in the model tiers in `references/grounding.md`.
 
+**On DeepSeek Harness**, every agent this file dispatches is spawned as an Agent Teams teammate: load the `ce-dsh-host` skill and follow its dispatch protocol — one shared task per dispatch, one teammate per agent, collected in this turn with bounded waits, with the artifact still the fact the merge reads. When that skill is not installed, follow this file unchanged.
+
 ## Fleet
 
 Dispatch parallel ideation sub-agents per the model-tier fleet in `references/grounding.md`. Omit the `mode` parameter so the user's configured permission settings apply. The default fleet is **5 agents covering all six frames**:

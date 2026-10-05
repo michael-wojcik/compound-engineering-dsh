@@ -83,6 +83,8 @@ Pre-dispatch eligibility is based on installed route presence and sanction, not 
 
 ## Step 4 — Run the bundled script (one call per activated trio lens, in parallel with the persona reviewers)
 
+**On DeepSeek Harness**, reach this peer through an Agent Teams teammate when its model comes from an external CLI — the teammate runs the CLI and reports, and the diversity is the CLI's. A peer that must instead run in-harness on a second configured provider cannot be a teammate, because a teammate runs the session model: use the `workflow` tool's `agent(prompt, { provider, model })`, and treat the route as unavailable when only one provider is configured. The `ce-dsh-host` skill carries both shapes. When that skill is not installed, follow this file unchanged.
+
 Each call is a CLI shell-out, not a subagent. Resolve one target and one fixed route once per document review, then launch every activated lens against that same sanctioned target/route. Launch each call as a detached job through `scripts/peer-job-runner.py` in the same dispatch wave as the in-process reviewers. A failed route does not fall through inside the worker.
 
 **Two modes — slice the trio, sweep the whole doc (R20, KTD6):**

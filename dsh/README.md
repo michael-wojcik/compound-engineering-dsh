@@ -15,7 +15,7 @@ CE skills are written host-neutrally: they name a capability ("the host's subage
 | `references/primitive-map.md` | Exact tool names, what counts as collected per primitive, the Lead-only and name-uniqueness constraints, model overrides, the fallback ladder |
 | `references/background-watch.md` | The `ce-babysit-pr` watch loop on background jobs, and the durable escalation |
 
-**A binding pointer at every dispatch site** in the upstream skills: one or two sentences placed immediately before the instruction that launches an agent, naming the `ce-dsh-host` skill and falling back to the file as written when it is not installed. `dsh/check-coverage.sh` prints the per-skill matrix and exits non-zero when a skill dispatches without one.
+**A binding pointer at every dispatch site** in the upstream skills — 41 of them, in six variants matched to what the site does. Each naming the `ce-dsh-host` skill and falling back to the file as written when it is not installed. A same-model dispatch gets the teammate protocol; a cross-model peer gets the split rule, because a teammate cannot carry a model override; a per-agent tier site gets the same split; a `SKILL.md` with no byte headroom gets a short form. `dsh/check-coverage.sh` gates at skill level, reports unbound launch sites separately from mere mentions, and exits non-zero when a skill dispatches without a pointer.
 
 The adapter skill deliberately lives outside `skills/`. It is a DSH-only artifact: keeping it out of the plugin's product surface leaves the upstream skill inventory, the marketplace metadata, and the release-version contract untouched, so `git pull upstream main` stays a small rebase.
 
@@ -61,7 +61,7 @@ Four of `ce-work`'s execution engines now probe as callable, where the upstream 
 ## Verification
 
 - `bun run release:validate` and the change-specific guards — full record in `dsh/verification.md`, including the pre-existing suite failure mode on this machine.
-- `dsh/check-coverage.sh` — per-skill matrix of dispatch sites against binding pointers; exits non-zero when a skill dispatches unbound.
+- `dsh/check-coverage.sh` — skill-level gate plus the file-level list of dispatch-bearing files that still lack an in-file pointer, so the residuals are re-judged rather than assumed.
 - DSH skill discovery — all 37 skill bundles (36 upstream + `ce-dsh-host`) load through DSH's own `FileSystemSkillProvider` from both `$DSH_HOME/skills` and `<project>/.dsh/skills`, with no warnings and correct invocation policy.
 - Teammate dispatch — spawned, collected, and released end to end with CE's own personas; evidence in `dsh/verification.md`.
 - **Skipped:** the repo's fresh-agent skill eval (`bun run test:skill-eval-pack`) needs `claude` / `codex` on PATH and bills those products. It was not run; the DSH-side dispatch was exercised directly instead, which is the behavior this fork changes.

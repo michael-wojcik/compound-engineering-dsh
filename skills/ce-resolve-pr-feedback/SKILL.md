@@ -7,6 +7,8 @@ allowed-tools: Bash(gh *), Bash(git *), Bash(bash *), Bash(python3 *), Read, Wri
 
 # Resolve PR Review Feedback
 
+**On DeepSeek Harness** this dispatch is an Agent Teams teammate; the `ce-dsh-host` skill carries the protocol.
+
 Judge fresh PR review feedback centrally, then dispatch generic subagents seeded with the bundled fixer prompt only for approved fixes. Publish the fixes before replying and resolving. Resume completes saved judgments without another fix pass.
 
 **Done:** Every selected item has a verdict and verified conversation completion or a reported residual. Completed threads have a visible submitted reply with quoted context and authoritative resolution; `needs-human` threads stay open. Ordinary and pipeline runs publish valid fixes before completion. Return-to-caller preserves its local fix commit and exact pending actions in a readable validated handoff, or records actual no-change completion. Resume verifies fresh publication and returns checkpointed completion or pending saved actions with retry evidence. Pending actions are never reported as resolved.

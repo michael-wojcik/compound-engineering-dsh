@@ -20,6 +20,8 @@ If the session model already **is** the resolved model, there is nothing to elev
 
 ## Adapter selection
 
+**On DeepSeek Harness**, reach this peer through an Agent Teams teammate when its model comes from an external CLI — the teammate runs the CLI and reports, and the diversity is the CLI's. A peer that must instead run in-harness on a second configured provider cannot be a teammate, because a teammate runs the session model: use the `workflow` tool's `agent(prompt, { provider, model })`, and treat the route as unavailable when only one provider is configured. The `ce-dsh-host` skill carries both shapes. When that skill is not installed, follow this file unchanged.
+
 When elevation is active, resolve an adapter in this fixed order and use the first that serves the requested model:
 
 1. **Native in-harness dispatch.** Attempt the platform subagent primitive with a per-agent model override (e.g. `model: "fable"` on the Claude Code `Agent`/`Task` tool). Capability is proven by attempt, not self-assessment — a harness that can serve the model natively does; one that cannot fails the attempt and falls through. **Receipt rule (R6):** a "receipt" is the serving side's report of which model actually ran. A native run whose receipt names a *different* model family than requested falls through to the next adapter; a run with *no* receipt proceeds and is recorded as unverified (it does NOT fall through).

@@ -94,6 +94,8 @@ When the plan carries `session-settled:`-labeled KTDs or Key Decisions, pass the
 
 4. **UI Verification** (if applicable)
 
+**On DeepSeek Harness**, every agent this file dispatches is spawned as an Agent Teams teammate: load the `ce-dsh-host` skill and follow its dispatch protocol — one shared task per dispatch, one teammate per agent, collected in this turn with bounded waits, with the artifact still the fact the merge reads. When that skill is not installed, follow this file unchanged.
+
 For UI work built from a Figma design, read `references/agents/figma-design-sync.md` and dispatch a generic subagent seeded with that local prompt to compare the implementation against the design. Do not dispatch a standalone agent by type/name. Apply the reported fixes that hold up against the project's conventions, then compare again until it reports a match or only differences you judge intentional.
 
 For other user-visible UI changes, check the changed UI in a browser at desktop and mobile widths when browser tooling is available. If none is available, review the layout code for overflow and responsive breakage and record that browser verification was unavailable. Phase 4's screenshot capture still applies when the change is user-visible.

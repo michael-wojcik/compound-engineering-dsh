@@ -23,6 +23,8 @@ When the platform's task-tracking capability is available, show the review, appl
 
 ## Step 2: Launch 3 review agents in parallel
 
+**On DeepSeek Harness** these reviewers are Agent Teams teammates; where a reviewer's model tier must genuinely differ, use the `workflow` tool's `provider` and `model` overrides instead. The `ce-dsh-host` skill carries both.
+
 Dispatch three generic subagents — code-reuse, code-quality, and efficiency reviewers — via the platform's subagent primitive (`Agent`/`Task` in Claude Code, `spawn_agent` in Codex) where available; otherwise run the reviews inline or serially. For each reviewer, read its prompt asset from this skill's directory and pass the **full file content** as the subagent's prompt, together with the resolved scope (the full diff or file set) so it has complete context:
 
 - `references/personas/code-reuse-reviewer.md`

@@ -12,6 +12,8 @@ When a research artifact is a root-level `*.md` that the focus hint names, list 
 
 ## Handling by size
 
+**On DeepSeek Harness**, every agent this file dispatches is spawned as an Agent Teams teammate: load the `ce-dsh-host` skill and follow its dispatch protocol — one shared task per dispatch, one teammate per agent, collected in this turn with bounded waits, with the artifact still the fact the merge reads. When that skill is not installed, follow this file unchanged.
+
 - **Small artifacts** — ones that fold into the grounding summary without dominating the shared grounding block (which is replicated byte-identical into every ideation dispatch): include directly under `User-supplied research`. No distiller.
 - **Everything larger** — dispatch one extraction-tier sub-agent per artifact, in parallel with the other Phase 1 grounding agents. Pass each the absolute `<scratch-dir>` path from Phase 1 and a **collision-resistant slug**, with the prompt below.
 

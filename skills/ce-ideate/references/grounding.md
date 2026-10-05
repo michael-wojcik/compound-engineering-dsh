@@ -28,6 +28,8 @@ Use the echoed absolute path as `<scratch-dir>` for every checkpoint write and c
 
 **If that test routes anything to evidence, read `references/user-research-artifacts.md` now, before the batch below.** Distillers belong *in* the same parallel foreground batch as the other grounding agents; loading their dispatch spec after the batch has already run serializes the most expensive read in the phase behind everything else.
 
+**On DeepSeek Harness**, every agent this file dispatches is spawned as an Agent Teams teammate: load the `ce-dsh-host` skill and follow its dispatch protocol — one shared task per dispatch, one teammate per agent, collected in this turn with bounded waits, with the artifact still the fact the merge reads. When that skill is not installed, follow this file unchanged.
+
 Run grounding agents in parallel in the **foreground** (do not background — results are needed before Phase 2):
 
 **Repo mode dispatch:**
