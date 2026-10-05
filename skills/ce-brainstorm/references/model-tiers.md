@@ -1,6 +1,6 @@
 # Model Tiers
 
-**On DeepSeek Harness**, a dispatch whose model does not actually differ from the session model is an Agent Teams teammate, per the `ce-dsh-host` skill's dispatch protocol. Where the tier must genuinely differ, a teammate cannot carry that override: use the `workflow` tool's `agent(prompt, { provider, model })`, and treat the tier as unavailable when only one provider is configured. When that skill is not installed, follow this file unchanged.
+**On DeepSeek Harness**, a dispatch whose model does not actually differ from the session model is an Agent Teams teammate, per the `ce-dsh-host` skill's dispatch protocol. Where the tier must genuinely differ, a teammate cannot carry that override: use the `workflow` tool's `agent(prompt, { provider, model })`, and treat the tier as unavailable when only one provider is configured. The Phase 1.1 grounding scout is the exception to that route: it deliberately spans the user's think-time, per `references/dialogue.md`, and a blocking `workflow` call cannot be suspended for the answer — run that scout on the session model as a teammate and record the tier as unavailable. When that skill is not installed, follow this file unchanged.
 
 Read this when dispatching a sub-agent (the Phase 1.1 grounding scout, the Phase 2.6 claim verifier, or the opt-in Slack researcher). Sub-agent dispatch is tiered by task shape, never hardcoded to a model name:
 

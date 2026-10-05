@@ -2,7 +2,7 @@
 
 The orchestrator spawns one media-analyzer sub-agent per feedback item that has media. Fill every slot at spawn time.
 
-**On DeepSeek Harness**, each analyzer is spawned as an Agent Teams teammate: load the `ce-dsh-host` skill and follow its dispatch protocol — one shared task per analyzer, one teammate per analyzer, passing each the path of its persona and media item so it reads them itself, and collecting every launch in this turn with repeated bounded waits. When that skill is not installed, dispatch each analyzer as an ordinary subagent instead.
+**On DeepSeek Harness**, each analyzer is spawned as an Agent Teams teammate: load the `ce-dsh-host` skill and follow its dispatch protocol — one shared task per analyzer, one teammate per analyzer, each seeded with the persona content this file's template defines, with every launch collected in this turn by repeated bounded waits. When that skill is not installed, dispatch each analyzer as an ordinary subagent instead.
 
 ## Template
 

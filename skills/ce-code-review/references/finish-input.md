@@ -69,7 +69,7 @@ Each leaf reads, from `skill_dir`, `references/finish-review.md` and every refer
 
 ## How the dispatch context launches a leaf
 
-**On DeepSeek Harness**, every agent this file dispatches is spawned as an Agent Teams teammate: load the `ce-dsh-host` skill and follow its dispatch protocol — one shared task per dispatch, one teammate per agent, collected in this turn with bounded waits, with the artifact still the fact the merge reads. When that skill is not installed, follow this file unchanged.
+**On DeepSeek Harness**, the dispatch context — which runs as the Lead — spawns each leaf as an Agent Teams teammate: load the `ce-dsh-host` skill and follow its dispatch protocol — one shared task per leaf, one teammate per leaf, collected in this turn with bounded waits, with the artifact still the fact the merge reads. A leaf cannot spawn, and the instruction below already tells it so. When that skill is not installed, follow this file unchanged.
 
 Put the full contents of `finish-input.json` inline in the leaf's prompt, together with the absolute paths of the run directory, this reference, and `references/finish-review.md`, and tell it which stages it owns, to read those two references first, and to record its own stage in the stage log with `scripts/run-log.py` under `skill_dir` (the recipe is in `references/scope.md`, Stage log). Inline the file rather than only naming it: the facts it carries are small, and a subagent that has them in its prompt cannot skip the read. Everything larger (the diff, the per-reviewer artifacts, the compact returns) stays on disk and is read by path. No override on the model: both leaves inherit the session model. Tell each leaf plainly that it launches no subagents.
 

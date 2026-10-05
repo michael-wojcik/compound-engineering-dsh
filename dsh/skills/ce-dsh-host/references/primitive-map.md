@@ -23,7 +23,7 @@ CE prose names capabilities, not tools. In this harness they are:
 - **Names are permanent for the session.** A spawn with a used name is rejected outright; there is no delete. Always suffix with the run.
 - **The shared task board is durable and visible.** A teammate can list, claim, and complete tasks, and `wait_agent` wakes on board changes as well as messages. This makes the board the launch inventory that survives compaction, and `blocked_by` the place to express ordering the calling skill already defines.
 - **`write_scopes` are workspace-relative.** An artifact outside the workspace cannot be declared as a scope.
-- **No model override.** A teammate runs the session model. This is the only reason a dispatch ever leaves the teammate rung.
+- **No model override.** A teammate runs the session model, so a dispatch that must genuinely run on a different model leaves the teammate rung. The other reason to leave it is that the dispatcher is not the Lead; `references/dispatch-protocol.md` carries both.
 
 ## The task surface is two things, not one
 

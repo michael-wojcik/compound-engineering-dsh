@@ -117,7 +117,7 @@ Every finding from the review runs, and what happened to it.
 | DSH dispatch omits the criteria mapping for personas that need one | **Fixed.** The brief instructs each agent to read the criteria files its persona names. |
 | Dispatch reads personas and run directories without resolving the artifact root | **Fixed.** The run directory resolves through the calling skill's artifact-root rules. |
 | The claimed execution evidence pointed at a file the change did not contain | **Fixed.** This file. |
-| Shipped skill files route to `ce-dsh-host` with no fallback when the load fails | **Fixed.** Every pointer states the fallback. |
+| Shipped skill files route to `ce-dsh-host` with no fallback when the load fails | **Partly fixed, and the first claim was overstated.** 44 of the 62 bindings state the fallback; the 18 that do not are task-surface mappings and short forms, where a missing skill leaves the sentence inert rather than wrong. |
 | The new skill points at another skill's files with skill-local path syntax | **Addressed.** The protocol resolves persona, scope, criteria, and schema paths from the calling skill's own directory. |
 | The one-line addition to `ce-pov/SKILL.md` took it past Codex's 8000-byte bound | **Fixed.** The block moved into `ce-pov/references/cross-model-panel.md`; `SKILL.md` is byte-identical to upstream. |
 
