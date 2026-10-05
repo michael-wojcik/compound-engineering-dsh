@@ -22,6 +22,8 @@ Use the harness's tools to run the detector and wait for its output. A skill dri
 | Codex (CLI) | `exec_command` to start the detector, then `write_stdin` to wait on the returned process session | No (session-bound) |
 | DeepSeek Harness | background `bash` + `job_output` with `wait: true` and a bounded timeout | No (session-bound) — `schedule_create` re-prompts the session; OS cron for a watch that must outlive it |
 
+**On DeepSeek Harness** this watch is a background process rather than an Agent Teams dispatch; the `ce-dsh-host` skill's background-watch reference carries its shape.
+
 **User-runnable resume syntax.** Whenever this reference tells the skill to print or copy a resume invocation, default to `/ce-babysit-pr <url>` and, when the run posture is not `target`, append the same `posture:stack-ready` or `posture:stack-land` token so checkpoint / durable / session re-entry keeps stack scope. Use `$ce-babysit-pr <url> [posture:…]` only when the active host is Codex or explicitly documents dollar-prefixed skill invocation. Render only the invocation as inline code and output one form only.
 
 **Checkpoint:** Use checkpoint mode only when the user requests it or the harness cannot keep the session active while waiting for the detector's output. Run one tick, persist state, report, and print the exact host-rendered resume invocation. Say monitoring is paused. Never fake a loop with a foreground `sleep` or an unmanaged detached process.

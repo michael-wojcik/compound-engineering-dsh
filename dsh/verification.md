@@ -33,6 +33,21 @@ The review produced real findings, not placeholders: a P0 IDOR (`req.query.user_
 
 On the `SKILL.md` byte budget: bindings went into `references/` wherever the repository's layout allowed. Three `SKILL.md` files took a short-form pointer and stay under Codex's 8000-byte bound — `ce-bakeoff` (7705), `ce-resolve-pr-feedback` (6859), `ce-simplify-code` (6989). `ce-explain` was already over that bound and inside the repository's own ratchet set before this change; its one dispatch site took a short-form clause and it stays in that set at 8785 bytes, which the guard tolerates because membership is a set rather than a size pin.
 
+## 2b. Deep audit of the bindings
+
+`dsh/audit-bindings.sh` asks four questions that `check-coverage.sh` cannot, each chosen because it could falsify the integration rather than restate it:
+
+| Check | Result |
+|---|---|
+| Does every file that discusses DeepSeek Harness route to the adapter? | 46 files mention DSH; all 46 name `ce-dsh-host`. This found one real gap: `ce-babysit-pr/references/watch-loop.md` gained a DSH table row but never routed, so the watch's own reference was unreachable from it. |
+| Does each binding precede its file's first launch instruction? | 14 files carry both. Four candidates were raised and all four are descriptive lines, not launches: "The elevated steps: …" (×2), the definition of "dispatch context", and a "before dispatching subagents" precondition. |
+| Do the exception texts sit on exception sites? | 5 peer bindings and 3 tier bindings, each on a file that discusses models. One further flag is a false positive: `dispatch-reviewers.md` has a *subsection* on the cross-model pass while its own dispatch is the local batch, and the peer's files carry the exception binding. |
+| Does the adapter's own material resolve? | No citation of the removed `reviewer-fanout` reference; every `references/` file named by the adapter exists. |
+
+The audit also found a defect in the earlier shape of `execution-engines.md`: the DeepSeek Harness paragraph sat *after* the engine table that describes the subagent primitive, so the mechanism was read before the binding. It now precedes the table.
+
+Every check in this repository is heuristic, and two of them were wrong before this round — `check-coverage.sh` under-reported, and the first version of `audit-bindings.sh` aborted silently on a `pipefail` interaction and printed nothing after its second heading. Both now print their candidates for judgement rather than a single number.
+
 ## 3. Repository gates
 
 - `bun run release:validate` — passes: "0 agents, 36 skills, 0 MCP servers". The plugin inventory is untouched because the binding lives outside `skills/`.

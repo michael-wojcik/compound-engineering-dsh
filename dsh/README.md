@@ -62,6 +62,7 @@ Four of `ce-work`'s execution engines now probe as callable, where the upstream 
 
 - `bun run release:validate` and the change-specific guards — full record in `dsh/verification.md`, including the pre-existing suite failure mode on this machine.
 - `dsh/check-coverage.sh` — skill-level gate plus the file-level list of dispatch-bearing files that still lack an in-file pointer, so the residuals are re-judged rather than assumed.
+- `dsh/audit-bindings.sh` — deeper checks: every file that mentions DeepSeek Harness routes to the adapter, every binding precedes its file's first launch instruction, exception texts sit on exception sites, and the adapter's own references resolve. Prints candidates for judgement rather than a bare pass.
 - DSH skill discovery — all 37 skill bundles (36 upstream + `ce-dsh-host`) load through DSH's own `FileSystemSkillProvider` from both `$DSH_HOME/skills` and `<project>/.dsh/skills`, with no warnings and correct invocation policy.
 - Teammate dispatch — spawned, collected, and released end to end with CE's own personas; evidence in `dsh/verification.md`.
 - **Skipped:** the repo's fresh-agent skill eval (`bun run test:skill-eval-pack`) needs `claude` / `codex` on PATH and bills those products. It was not run; the DSH-side dispatch was exercised directly instead, which is the behavior this fork changes.
