@@ -54,7 +54,7 @@ Four of `ce-work`'s execution engines now probe as callable, where the upstream 
 - **Inline/subagent** — Agent Teams teammates, per the dispatch protocol.
 - **Goal-mode** — `create_goal` / `update_goal` are callable tools, so a skill starts it directly instead of printing a copyable `/goal` prompt.
 - **Dynamic-workflow** — `workflow` is a callable orchestration primitive that returns structured results, so `ce-work`'s large-fan-out row is available rather than prompt-emission only.
-- **Cross-model** — a peer that runs through an external CLI is hosted by a teammate; only a peer that must run in-harness on a second configured provider needs the `workflow` override route.
+- **Cross-model** — a peer that runs through an external CLI is hosted by a teammate; only a peer that must run in-harness on a second configured provider needs the `workflow` override route. **Neither route is available in this deployment**: no Codex subscription for the CLI peers, and one configured provider, so CE's cross-model paths take their own documented fallbacks. A second model from the same provider would run but is not an independent peer — CE verifies independence only across model families.
 
 ## Deliberate limits
 
