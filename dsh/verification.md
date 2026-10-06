@@ -62,20 +62,22 @@ The objective has two halves, and this is the first: that the DSH skills still *
 |---|---|
 | Files deleted or renamed | **0** |
 | Upstream lines modified or removed | **0** |
-| Lines added across `skills/` | **138**, across 62 files |
+| Lines added across `skills/` | **136**, across 61 files |
 | Non-plugin divergence | the `dsh/` tree only — the adapter skill, the three scripts, `README.md`, `verification.md` |
 | Untouched | every manifest, `src/`, `tests/`, the plugin `README.md`, the marketplace catalogs, and all 36 `SKILL.md` files except two that took a standalone paragraph |
 
 Every upstream instruction is byte-identical: the fork adds binding paragraphs and changes no original sentence. The two files whose line counts moved are `ce-doc-review/references/dispatch.md` and `ce-explain/SKILL.md`, and in both the binding was first written *into* the upstream sentence and then moved out to its own paragraph, precisely so this table could read zero modified lines rather than two.
 
-The fork is rebased on `upstream/main` (`030188b4`, 0 commits behind). Its base changed once during this work: the earlier base predated upstream's test-loop repair, which is why the `TimeoutError` failures recorded in section 3 appeared at all.
+The fork is rebased on `upstream/main` (`efcb657d`, 0 commits behind). Its base has moved twice, and the second move is the useful evidence: the first rebase (`9af474a7` → `030188b4`) picked up upstream's test-loop repair, which is why the `TimeoutError` failures recorded in section 3 appeared at all; the second (`030188b4` → `efcb657d`) was a genuine merge rather than a fast-forward, and cost five conflict resolutions across four `ce-work` files.
+
+One binding did not survive it, and that is the right outcome. Upstream's `#1837` deleted `ce-work`'s engine-probe section outright, taking the table the `execution-engines.md` binding described with it — goal-mode and dynamic-workflow no longer exist as `ce-work` engines. The binding was retired rather than re-homed, which is why the counts above read 61 files, not 62. A binding whose referent upstream removed is worse than no binding: it would fail the vacuous-binding check in `dsh/audit-bindings.sh` and tell a reader to route dispatch through a section that is no longer there.
 
 ## 2. Coverage of the binding
 
 `dsh/check-coverage.sh` reports two levels: skill level is a gate, file level is evidence for review.
 
 - **Skill level: 36 skills scanned, 0 gaps.** Every skill that stages a dispatch carries the binding somewhere.
-- **62 files carry a binding**, in the variants `dsh/check-coverage.sh` reports; the adapter's consumer list names the 21 skills they belong to, and `dsh/audit-bindings.sh` fails when that list and the tree disagree. Earlier rounds of this document quoted 26, then 41, then 46 — each was an under-count produced by a tool defect recorded in §2b and §2d, which is why the counts now live in the scripts rather than here.
+- **61 files carry a binding**, in the variants `dsh/check-coverage.sh` reports; the adapter's consumer list names the 21 skills they belong to, and `dsh/audit-bindings.sh` fails when that list and the tree disagree. Earlier rounds of this document quoted 26, then 41, then 46 — each was an under-count produced by a tool defect recorded in §2b and §2d, which is why the counts now live in the scripts rather than here.
 - **File level: the coverage script lists 23 files that still match dispatch language with no in-file pointer, and none is an unbound launch site.** Two are prompt templates a spawned agent receives; three are `SKILL.md` files that route to a bound reference; one is the `ce-babysit-pr` detector, which is a process rather than a subagent; the rest state a cap, a precondition, or analyze a past dispatch rather than issuing one. The script prints this list on every run so the judgement is re-checked rather than assumed. The count is quoted from the script rather than restated, because it moved from 19 to 23 when the launcher pattern was made case-insensitive (section 2d) — and a validator caught this line still giving the old number.
 - The check is a heuristic, and an earlier narrow version of it was wrong. It reported "0 unbound" while `ce-retune` required two waves to run as separate dispatched agents and `ce-simplify-code` dispatched three reviewers from its `SKILL.md` — neither carried a pointer. The pattern is now deliberately broad, and the script prints its own false positives instead of hiding them behind a single number.
 - Four files were deliberately not edited, and each is correct: `ce-compound/references/lightweight.md` (the mode launches no subagents at all), `ce-doc-review/references/subagent-template.md` and `ce-optimize/references/experiment-prompt-template.md` (prompt payloads a spawned agent receives, not launch instructions), and `ce-brainstorm/references/model-tiers.md` (tier policy for dispatches staged elsewhere — closed instead by binding `ce-brainstorm/references/dialogue.md`, the file that dispatches).
@@ -88,7 +90,7 @@ On the `SKILL.md` byte budget: bindings went into `references/` wherever the rep
 
 | Check | Result |
 |---|---|
-| Does every file that discusses DeepSeek Harness route to the adapter? | 62 files mention DSH; all 62 name `ce-dsh-host` (46 at the time this check first ran). This found one real gap: `ce-babysit-pr/references/watch-loop.md` gained a DSH table row but never routed, so the watch's own reference was unreachable from it. |
+| Does every file that discusses DeepSeek Harness route to the adapter? | 61 files mention DSH; all 61 name `ce-dsh-host` (46 at the time this check first ran). This found one real gap: `ce-babysit-pr/references/watch-loop.md` gained a DSH table row but never routed, so the watch's own reference was unreachable from it. |
 | Does each binding precede its file's first launch instruction? | 14 files carry both. Four candidates were raised and all four are descriptive lines, not launches: "The elevated steps: …" (×2), the definition of "dispatch context", and a "before dispatching subagents" precondition. |
 | Do the exception texts sit on exception sites? | 5 peer bindings and 3 tier bindings, each on a file that discusses models. One further flag is a false positive: `dispatch-reviewers.md` has a *subsection* on the cross-model pass while its own dispatch is the local batch, and the peer's files carry the exception binding. |
 | Does the adapter's own material resolve? | No citation of the removed `reviewer-fanout` reference; every `references/` file named by the adapter exists. |
@@ -130,7 +132,7 @@ Two guards were added: a consumer-list check that fails when the adapter's claim
 
 ## 3. Repository gates
 
-Measured on the rebased tree, against a detached worktree of `upstream/main` (`030188b4`) on the same machine.
+Measured against a detached worktree of `upstream/main` on the same machine. The full-suite comparison below was taken at base `030188b4`; after the second rebase (`efcb657d`) the fast gates were re-run green and the full-suite pairing was **not** repeated, so its numbers are one base old.
 
 | Gate | Result |
 |---|---|
