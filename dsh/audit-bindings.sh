@@ -13,6 +13,12 @@
 #                    restated in prose went stale twice (the launcher pattern and
 #                    a rebase each moved it), so it is checked rather than trusted.
 set -uo pipefail
+# `-e` is deliberately absent, and adding it would break this script in two places.
+# Section 2 reads the exit status of a grep pipeline allowed to match nothing
+# (line 55's empty-lline path depends on surviving that), and section 7 assigns a
+# command substitution precisely so it can read a non-zero status on the next line.
+# Enabling `-e` needs `|| true` on each relying substitution first — a behaviour-
+# verified change of its own, not a consistency cleanup.
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 SKILLS_DIR="$REPO_ROOT/skills"
@@ -29,6 +35,12 @@ LAUNCH_RE='(spawn|dispatch|launch|delegate)[a-z]* ((a|an|the|each|one|its|every|
 # The negation must sit next to the verb. Matching it anywhere on the line hid a
 # real launch ("spawn a lightweight sub-agent ... without a full review").
 NEGATE_RE='(do not|don.t|never|without|rather than|instead of|temptation to|no subagents|skips)[a-z ]{0,12}(spawn|dispatch|launch|delegate)'
+
+# The launch lines in a file: a dispatch verb near an agent noun, minus the lines
+# that forbid or avoid one. Checks 2 and 6 must agree on what counts as a launch,
+# and this rule already drifted once when check 6 was written without the filter,
+# so both read this one definition rather than restating it.
+launch_hits() { grep -niE "$LAUNCH_RE" "$1" 2>/dev/null | grep -vEi "$NEGATE_RE"; }
 
 echo "1. COMPLETENESS — every file discussing DeepSeek Harness routes to the adapter"
 count=0
@@ -51,7 +63,7 @@ checked=0
 while IFS= read -r f; do
   [[ -n "$f" ]] || continue
   pline="$(grep -n "ce-dsh-host" "$f" 2>/dev/null | head -1 | cut -d: -f1)"
-  lline="$(grep -niE "$LAUNCH_RE" "$f" 2>/dev/null | grep -vEi "$NEGATE_RE" | head -1 | cut -d: -f1)"
+  lline="$(launch_hits "$f" | head -1 | cut -d: -f1)"
   [[ -n "$pline" && -n "$lline" ]] || continue
   checked=$((checked + 1))
   if [[ "$pline" -gt "$lline" ]]; then
@@ -134,9 +146,9 @@ vacuous=0
 while IFS= read -r f; do
   [[ -n "$f" ]] || continue
   grep -qE "$STANDARD|$REVIEWER|$ANALYZER|$SHORT" "$f" || continue
-  # Same negation filter check 2 applies: a file whose only dispatch text is a
-  # prohibition ("never spawn a subagent") launches nothing and is still vacuous.
-  if ! grep -niE "$LAUNCH_RE" "$f" | grep -qvEi "$NEGATE_RE"; then
+  # One rule, one implementation: this is the same filter check 2 applies, so a
+  # file whose only dispatch text is a prohibition launches nothing and is vacuous.
+  if [[ -z "$(launch_hits "$f")" ]]; then
     echo "   FAIL: ${f#"$REPO_ROOT"/} says \"every agent this file dispatches\" but launches nothing"
     vacuous=$((vacuous + 1))
   fi

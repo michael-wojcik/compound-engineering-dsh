@@ -97,7 +97,7 @@ while IFS= read -r f; do
   # dies before the summary and its exit code — a crash standing in for a verdict.
   sed -n '1,3p' <<<"$hits" | cut -c1-140 | sed 's/^/           /'
   launch_unbound=$((launch_unbound + 1))
-done < <(grep -rlE "$DISPATCH_RE" "$SKILLS_DIR" --include="*.md" 2>/dev/null | sort)
+done < <(grep -rliE "$DISPATCH_RE" "$SKILLS_DIR" --include="*.md" 2>/dev/null | sort)
 echo "  ($mentions further files mention a dispatch without launching one)"
 
 echo

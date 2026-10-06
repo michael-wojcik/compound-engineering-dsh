@@ -5,6 +5,8 @@ unified plan is written, or after a Lightweight run's chat paragraph is
 delivered with no file warranted. Options that need an artifact hide themselves
 below; the handoff itself is presented on both paths.
 
+**On DeepSeek Harness**, every agent this file dispatches is spawned as an Agent Teams teammate: load the `ce-dsh-host` skill and follow its dispatch protocol — one shared task per dispatch, one teammate per agent, collected in this turn with bounded waits. When that skill is not installed, follow this file unchanged.
+
 ---
 
 #### 4.0 Return to the caller instead of presenting options
