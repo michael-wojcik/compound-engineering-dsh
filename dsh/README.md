@@ -34,13 +34,16 @@ Only symlinks are created, so `git pull` updates the installed skills. A real di
 
 ## Updating from upstream
 
+A clone of this fork has `origin` pointing here, so add the upstream remote once:
+
 ```bash
+git remote add upstream https://github.com/EveryInc/compound-engineering-plugin.git
 git fetch upstream
 git rebase upstream/main dsh-adaptation
-bun run release:validate && bun run test
+bun install && bun run release:validate && bun run test:skill-guards
 ```
 
-The rebase conflicts are confined to the binding pointers. To carry the binding to another checkout without the branch, `git format-patch upstream/main --stdout > dsh-adaptation.patch` exports the same change set.
+The working branch is `dsh-adaptation`; `main` is the untouched upstream branch. The rebase is clean while every change stays additive — verified at `upstream/main` `030188b4`, where the fork diverges by 136 added lines, zero removed, and zero files deleted. To carry the binding to another checkout without the branch, `git format-patch upstream/main --stdout > dsh-adaptation.patch` exports the same change set.
 
 ## What this changes on DSH
 
