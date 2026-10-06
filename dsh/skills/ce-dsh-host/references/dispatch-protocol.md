@@ -8,7 +8,7 @@ The invariants it keeps: every launch is collected in the turn that made it; the
 
 ## Preconditions
 
-- **The orchestrator must be the Team Lead.** `spawn_teammate` is Lead-only. A CE skill running inside a teammate or subagent cannot dispatch teammates and takes the fallback ladder at the end of this file.
+- **The orchestrator must be the Team Lead.** `spawn_teammate` is Lead-only. A CE skill running inside a teammate or subagent cannot dispatch teammates and takes the fallback ladder at the end of this file. Do not decide this by looking for the tool: a dispatched agent's schema still lists `spawn_teammate`, annotated in its own description with "Only the Lead may call this tool". The test is who you are, not what you can see.
 - **Names are unique for the session and cannot be reused.** Name every teammate `<skill>-<persona>-<run4>`, where `run4` is the last four characters of the run ID, lowercased. Without the suffix, a second run in the same session fails to spawn. A spawn rejected because the name is taken is a naming collision: change the suffix and relaunch. A spawn rejected for capacity is a different failure — treat it as backpressure, keep the roster intact, and retry when a slot frees, exactly as the calling skill's own capacity rules require. Never read one rejection as the other.
 - **Teammates are never deleted.** They persist, inactive, for the session, which is a second reason the run suffix matters.
 

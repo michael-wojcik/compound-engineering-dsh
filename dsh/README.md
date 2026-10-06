@@ -30,7 +30,7 @@ The adapter skill deliberately lives outside `skills/`. It is a DSH-only artifac
 
 Only symlinks are created, so `git pull` updates the installed skills. A real directory sharing a skill's name is never overwritten; the script stops and names it. Start a new DSH session, or wait for the skill catalog to refresh.
 
-**Requires the Agent Teams bundle.** `@deepseek-ai/dsh-experimental-agent-team-profile` ships switched off; enable it from the DSH Plugins page or add it to the profile. Without it there is no `spawn_teammate`, no shared task board, and no `wait_agent`, and every binding falls back to the ladder in the adapter's `dispatch-protocol.md`. That bundle also disables ordinary `subagent` delegation, so the fallback differs by profile: teammates → `workflow` → inline when it is on, `subagent` → `workflow` → inline when it is off.
+**Requires the Agent Teams bundle.** `@deepseek-ai/dsh-experimental-agent-team-profile` ships switched off; enable it from the DSH Plugins page or add it to the profile. Without it there is no `spawn_teammate`, no shared task board, and no `wait_agent`, and every binding falls back to the ladder in the adapter's `dispatch-protocol.md`. The bundle's own README also states that it disables ordinary `subagent` delegation, so the fallback may differ by profile — teammates → `workflow` → inline when it is on, `subagent` → `workflow` → inline when it is off. A dispatched agent's schema still lists `subagent` with no unavailability annotation, so treat that rung as *unverified* rather than absent and test it in the session before relying on it.
 
 ## Updating from upstream
 

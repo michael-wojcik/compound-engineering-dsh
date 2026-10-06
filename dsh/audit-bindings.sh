@@ -64,15 +64,17 @@ echo "   $checked files carry both; $misplaced candidate(s) to judge (a descript
 
 echo
 echo "3. VARIANT FIT — exception texts sit on exception sites"
-peer_files="$(grep -rl "$PEER" "$SKILLS_DIR" --include="*.md" 2>/dev/null || true)"
-tier_files="$(grep -rl "$TIER" "$SKILLS_DIR" --include="*.md" 2>/dev/null || true)"
+# Read the file list line-wise and deduplicated: an unquoted $peer_files $tier_files
+# word-split on spaces and visited a file carrying both variants twice, so one misfit
+# could count as two. Counts are computed from the tree, not from the string.
 misfit=0
-for f in $peer_files $tier_files; do
+while IFS= read -r f; do
+  [[ -n "$f" ]] || continue
   if ! grep -qiE "cross-model|provider|model (tier|override|selection)|elevat" "$f"; then
     echo "   FAIL: ${f#"$REPO_ROOT"/} carries an exception binding but never discusses models"
     misfit=$((misfit + 1))
   fi
-done
+done < <(grep -rlE "$PEER|$TIER" "$SKILLS_DIR" --include="*.md" 2>/dev/null | sort -u)
 while IFS= read -r f; do
   [[ -n "$f" ]] || continue
   grep -q "$PEER\|$TIER" "$f" && continue
@@ -83,10 +85,16 @@ while IFS= read -r f; do
   fi
 done < <(grep -rl "ce-dsh-host" "$SKILLS_DIR" --include="*.md" 2>/dev/null | sort)
 fails=$((fails + misfit))
-[[ "$misfit" -eq 0 ]] && echo "   ok: peer bindings $(printf '%s\n' $peer_files | grep -c .), tier bindings $(printf '%s\n' $tier_files | grep -c .), each on a model-discussing file"
+[[ "$misfit" -eq 0 ]] && echo "   ok: peer bindings $(grep -rl "$PEER" "$SKILLS_DIR" --include='*.md' 2>/dev/null | wc -l | tr -d ' '), tier bindings $(grep -rl "$TIER" "$SKILLS_DIR" --include='*.md' 2>/dev/null | wc -l | tr -d ' '), each on a model-discussing file"
 
 echo
 echo "4. INTERNAL CONSISTENCY"
+# An absent adapter would make every check below pass by having nothing to read, so
+# say so instead of reporting green over a directory that is not there.
+if [[ ! -r "$ADAPTER/SKILL.md" ]]; then
+  echo "   FAIL: adapter SKILL.md is not readable at $ADAPTER — sections 4 and 5 read nothing"
+  fails=$((fails + 1))
+fi
 stale="$(grep -rn "reviewer-fanout" "$SKILLS_DIR" "$ADAPTER" 2>/dev/null || true)"
 if [[ -z "$stale" ]]; then
   echo "   ok: nothing cites the removed reviewer-fanout reference"
@@ -94,16 +102,23 @@ else
   echo "   FAIL: stale reference:"; printf '%s\n' "$stale" | sed 's/^/     /'; fails=$((fails + 1))
 fi
 missing=0
+# Allow digits and nested paths: 'references/[a-z-]+\.md' never checked a citation
+# like references/step-2.md or references/agents/x.md, so those resolved by default.
 while IFS= read -r ref; do
   [[ -n "$ref" ]] || continue
   [[ -f "$ADAPTER/$ref" ]] || { echo "   FAIL: adapter cites missing $ref"; missing=$((missing + 1)); }
-done < <(grep -oE 'references/[a-z-]+\.md' "$ADAPTER/SKILL.md" 2>/dev/null | sort -u)
+done < <(grep -oE 'references/[A-Za-z0-9_/-]+\.md' "$ADAPTER/SKILL.md" 2>/dev/null | sort -u)
 fails=$((fails + missing))
 [[ "$missing" -eq 0 ]] && echo "   ok: every reference the adapter names resolves"
 
 echo
 echo "5. CONSUMER LIST — the adapter names exactly the skills that carry a binding"
-claimed="$(sed -n '/Consumers are the CE skills that carry a binding/,/audit-bindings.sh/p' "$ADAPTER/SKILL.md" | grep -oE '`(ce-[a-z-]+|lfg)`' | tr -d '`' | sort -u)"
+claimed="$(grep -F 'Consumers are the CE skills that carry a binding' "$ADAPTER/SKILL.md" \
+  | sed 's/.*Consumers are the CE skills that carry a binding//; s/\. [A-Z].*//' \
+  | grep -oE '`(ce-[a-z-]+|lfg)`' | tr -d '`' | sort -u)"
+# The list is a sentence on one long line. A sed range whose end anchor also matched
+# that line ran to EOF and absorbed skill names from unrelated prose, so deleting a
+# consumer from the list still produced a passing comparison.
 actual="$(for d in "$SKILLS_DIR"/*/; do n="$(basename "$d")"; grep -rq 'ce-dsh-host' "$d" 2>/dev/null && echo "$n"; done | sort -u)"
 if [[ "$claimed" == "$actual" ]]; then
   echo "   ok: $(printf '%s\n' "$actual" | grep -c .) skills claimed and bound, and no others"
@@ -119,17 +134,28 @@ vacuous=0
 while IFS= read -r f; do
   [[ -n "$f" ]] || continue
   grep -qE "$STANDARD|$REVIEWER|$ANALYZER|$SHORT" "$f" || continue
-  if ! grep -qiE "$LAUNCH_RE" "$f"; then
-    echo "   REVIEW: ${f#"$REPO_ROOT"/} says \"every agent this file dispatches\" but launches nothing"
+  # Same negation filter check 2 applies: a file whose only dispatch text is a
+  # prohibition ("never spawn a subagent") launches nothing and is still vacuous.
+  if ! grep -niE "$LAUNCH_RE" "$f" | grep -qvEi "$NEGATE_RE"; then
+    echo "   FAIL: ${f#"$REPO_ROOT"/} says \"every agent this file dispatches\" but launches nothing"
     vacuous=$((vacuous + 1))
   fi
 done < <(grep -rl "ce-dsh-host" "$SKILLS_DIR" --include="*.md" 2>/dev/null | sort)
+fails=$((fails + vacuous))
 [[ "$vacuous" -eq 0 ]] && echo "   ok: every positive dispatch binding sits in a file that launches an agent"
 
 echo
 echo "7. DOCUMENTED COUNTS — the numbers verification.md quotes match this tree"
 stale=0
-actual_launch="$(bash "$REPO_ROOT/dsh/check-coverage.sh" 2>/dev/null | sed -n 's/.*unbound launch sites: \([0-9][0-9]*\).*/\1/p' | tail -1)"
+# Capture the gate's output and its status. Piping straight into sed discarded the
+# exit code, so a red skill-level gate still audited green here.
+coverage_out="$(bash "$REPO_ROOT/dsh/check-coverage.sh" 2>&1)"
+coverage_rc=$?
+if [[ "$coverage_rc" -ne 0 ]]; then
+  echo "   FAIL: check-coverage.sh exited $coverage_rc — the skill-level gate is red, so its counts are not a pass"
+  stale=$((stale + 1))
+fi
+actual_launch="$(printf '%s\n' "$coverage_out" | sed -n 's/.*unbound launch sites: \([0-9][0-9]*\).*/\1/p' | tail -1)"
 actual_files="$(grep -rl 'ce-dsh-host' "$SKILLS_DIR" --include='*.md' 2>/dev/null | wc -l | tr -d ' ')"
 doc_launch="$(sed -n 's/.*no in-file pointer[^0-9]*\([0-9][0-9]*\) at this revision.*/\1/p' "$REPO_ROOT/dsh/verification.md" | head -1)"
 doc_files="$(sed -n 's/.*\*\*\([0-9][0-9]*\) files carry a binding\*\*.*/\1/p' "$REPO_ROOT/dsh/verification.md" | head -1)"

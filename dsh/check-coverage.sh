@@ -28,12 +28,22 @@ is_prompt_asset() {
   esac
 }
 
+# A gate that reads nothing must not report success. An absent or moved skills/
+# tree used to leave scanned/unbound at 0 and exit 0.
+shopt -s nullglob
+skill_dirs=("$SKILLS_DIR"/*/)
+shopt -u nullglob
+if (( ${#skill_dirs[@]} == 0 )); then
+  echo "GATE FAIL: no skill directories under $SKILLS_DIR — the gate read nothing." >&2
+  exit 2
+fi
+
 echo "SKILL LEVEL"
 printf '  %-26s %-9s %-9s %s\n' "SKILL" "DISPATCH" "POINTERS" "STATUS"
 
 unbound=0
 scanned=0
-for dir in "$SKILLS_DIR"/*/; do
+for dir in "${skill_dirs[@]}"; do
   [[ -f "$dir/SKILL.md" ]] || continue
   name="$(basename "$dir")"
   scanned=$((scanned + 1))
@@ -82,7 +92,10 @@ while IFS= read -r f; do
   # head -1, which let a file whose first match was descriptive be dismissed while a
   # real launch sat further down — that is how ce-retune/cut-passes.md and
   # ce-ideate/post-ideation-workflow.md passed review unbound.
-  printf '%s\n' "$hits" | head -3 | cut -c1-140 | sed 's/^/           /'
+  # A herestring, not a pipe into head: under `set -euo pipefail` a printf that
+  # outruns head's buffer takes SIGPIPE, the pipeline returns 141, and the script
+  # dies before the summary and its exit code — a crash standing in for a verdict.
+  sed -n '1,3p' <<<"$hits" | cut -c1-140 | sed 's/^/           /'
   launch_unbound=$((launch_unbound + 1))
 done < <(grep -rlE "$DISPATCH_RE" "$SKILLS_DIR" --include="*.md" 2>/dev/null | sort)
 echo "  ($mentions further files mention a dispatch without launching one)"
