@@ -83,7 +83,7 @@ Pre-dispatch eligibility is based on installed route presence and sanction, not 
 
 ## Step 4 — Run the bundled script (one call per activated trio lens, in parallel with the persona reviewers)
 
-**On DeepSeek Harness**, this peer is not a subagent dispatch: it stays the detached CLI job this file defines, with its job id, reaping, and `peer.outcome` contract unchanged. The `ce-dsh-host` skill's dispatch protocol governs any subagent work on this path.
+**On DeepSeek Harness**, this peer is not a subagent dispatch: it stays the detached CLI job this file defines, with its job id, reaping, and `peer.outcome` contract unchanged. The `ce-dsh-host` skill's dispatch protocol governs any subagent work on this path. When that skill is not installed, this file's own route stands unchanged.
 
 Each call is a CLI shell-out, not a subagent. Resolve one target and one fixed route once per document review, then launch every activated lens against that same sanctioned target/route. Launch each call as a detached job through `scripts/peer-job-runner.py` in the same dispatch wave as the in-process reviewers. A failed route does not fall through inside the worker.
 

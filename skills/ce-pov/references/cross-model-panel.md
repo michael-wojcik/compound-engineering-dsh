@@ -43,7 +43,7 @@ verified rather than guessing.
 detached CLI job this file defines, with its job id, reaping, and outcome
 contract unchanged. A re-run of the host's own model is still not a peer — it
 cannot pass the independence test above, so never present it as one. The
-`ce-dsh-host` skill's dispatch protocol governs any subagent work on this path.
+`ce-dsh-host` skill's dispatch protocol governs any subagent work on this path. When that skill is not installed, this file's own route stands unchanged.
 
 Attest the host harness and its serving family as two separate tokens:
 

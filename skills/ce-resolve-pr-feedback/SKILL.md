@@ -7,7 +7,7 @@ allowed-tools: Bash(gh *), Bash(git *), Bash(bash *), Bash(python3 *), Read, Wri
 
 # Resolve PR Review Feedback
 
-**On DeepSeek Harness** this dispatch is an Agent Teams teammate; the `ce-dsh-host` skill carries the protocol.
+**On DeepSeek Harness** this dispatch is an Agent Teams teammate; the `ce-dsh-host` skill carries the protocol. If it is not installed, follow this file unchanged.
 
 Judge fresh PR review feedback centrally, then dispatch generic subagents seeded with the bundled fixer prompt only for approved fixes. Publish the fixes before replying and resolving. Resume completes saved judgments without another fix pass.
 

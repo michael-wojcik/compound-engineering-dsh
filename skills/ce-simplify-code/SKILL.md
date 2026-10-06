@@ -19,13 +19,13 @@ If none of the above produces a non-empty scope, stop and ask the user what to s
 
 **Preflight.** If the scope has no substantive human-authored code — only documentation, generated or vendored files, dependencies or lockfiles, or mechanical churn — report that there is nothing to simplify and stop without reviewers. For mixed scopes, retain only the code. This check is about the kind of change, never its size: explicit small scopes still run, and any size or cost threshold is the caller's to set.
 
-**On DeepSeek Harness**, the task surface is `todo_write`: publish this view there and keep it current. The Agent Teams shared board is separate and carries the work items of any teammates this run dispatches; the `ce-dsh-host` skill maps both.
+**On DeepSeek Harness**, the task surface is `todo_write`: publish this view there and keep it current. The Agent Teams shared board is separate and carries the work items of any teammates this run dispatches; the `ce-dsh-host` skill maps both. When that skill is not installed, the `todo_write` mapping applies unchanged.
 
 When the platform's task-tracking capability is available, show the review, apply, and verification outcomes without creating one task per reviewer. Otherwise continue without simulating a task list in chat.
 
 ## Step 2: Launch 3 review agents in parallel
 
-**On DeepSeek Harness** these reviewers are Agent Teams teammates; where a reviewer's model tier must genuinely differ, use the `workflow` tool's `provider` and `model` overrides instead. The `ce-dsh-host` skill carries both.
+**On DeepSeek Harness** these reviewers are Agent Teams teammates; where a reviewer's model tier must genuinely differ, use the `workflow` tool's `provider` and `model` overrides instead. The `ce-dsh-host` skill carries both. If it is not installed, follow this file unchanged.
 
 Dispatch three generic subagents — code-reuse, code-quality, and efficiency reviewers — via the platform's subagent primitive (`Agent`/`Task` in Claude Code, `spawn_agent` in Codex) where available; otherwise run the reviews inline or serially. For each reviewer, read its prompt asset from this skill's directory and pass the **full file content** as the subagent's prompt, together with the resolved scope (the full diff or file set) so it has complete context:
 

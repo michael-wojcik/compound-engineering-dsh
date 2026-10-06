@@ -50,7 +50,9 @@ The static audits cannot show that a CE skill actually reaches for the binding. 
 
 **Two facts the live work established about the environment itself.** First, `spawn_teammate` is not merely rejected for a non-Lead agent: it is absent from that agent's tool schema, and the application bundle states the reason — "only the Lead creates direct teammates; there is no nested Team". A check run from a dispatched agent confirmed the absence and confirmed that the `ce-pov` binding describes that situation correctly. Second, and materially: Agent Teams ships switched off, and enabling its bundle disables ordinary `subagent` delegation while `workflow` can still create fresh children. The adapter had been presenting one flat ladder for both profiles; it now states the precondition and gives the ladder per profile.
 
-**Not exercised:** the Stage 5b validator batch, which the merge stage owns and which the report recorded as a coverage limit rather than hiding. Cross-model work is a separate case — it is *unavailable in this deployment* rather than untested; see section 7.
+**Stage 5b then ran, late, and earned its place.** A validator teammate was dispatched after this document had already recorded the batch as skipped — and checking the contract showed the skip was wrong: `finish-review.md` permits skipping a validator only when a finding has cross-model corroboration, and this run had no cross-model peer. Its verdicts were 1 confirmed and 4 rejected, and the four rejections are drift rather than acquittal: each cited finding had been fixed between the reviewed revision `351f2611` and validation at HEAD, which the validator states in every verdict. The one confirmation was live and is fixed above — `verification.md:77` quoted a file-level count of 19 where the script printed 23. Running this stage hours after the review is what made it mostly a drift detector; running it in sequence is what would have made it a filter.
+
+**Not exercised:** nothing in the pipeline remains unrun — stages 4, 5b, 5, and 6 have each executed on Agent Teams. Cross-model work is a separate case: *unavailable in this deployment* rather than untested, per section 7.
 
 ## 1c. Mirror fidelity: the fork versus upstream
 
@@ -60,7 +62,7 @@ The objective has two halves, and this is the first: that the DSH skills still *
 |---|---|
 | Files deleted or renamed | **0** |
 | Upstream lines modified or removed | **0** |
-| Lines added across `skills/` | **136**, across 62 files |
+| Lines added across `skills/` | **138**, across 62 files |
 | Non-plugin divergence | the `dsh/` tree only — the adapter skill, the three scripts, `README.md`, `verification.md` |
 | Untouched | every manifest, `src/`, `tests/`, the plugin `README.md`, the marketplace catalogs, and all 36 `SKILL.md` files except two that took a standalone paragraph |
 
@@ -74,7 +76,7 @@ The fork is rebased on `upstream/main` (`030188b4`, 0 commits behind). Its base 
 
 - **Skill level: 36 skills scanned, 0 gaps.** Every skill that stages a dispatch carries the binding somewhere.
 - **62 files carry a binding**, in the variants `dsh/check-coverage.sh` reports; the adapter's consumer list names the 21 skills they belong to, and `dsh/audit-bindings.sh` fails when that list and the tree disagree. Earlier rounds of this document quoted 26, then 41, then 46 — each was an under-count produced by a tool defect recorded in §2b and §2d, which is why the counts now live in the scripts rather than here.
-- **File level: 19 files still match dispatch language with no in-file pointer, and none is an unbound launch site.** Two are prompt templates a spawned agent receives; three are `SKILL.md` files that route to a bound reference; one is the `ce-babysit-pr` detector, which is a process rather than a subagent; the rest state a cap, a precondition, or analyze a past dispatch rather than issuing one. The script prints this list on every run so the judgement is re-checked rather than assumed.
+- **File level: the coverage script lists 23 files that still match dispatch language with no in-file pointer, and none is an unbound launch site.** Two are prompt templates a spawned agent receives; three are `SKILL.md` files that route to a bound reference; one is the `ce-babysit-pr` detector, which is a process rather than a subagent; the rest state a cap, a precondition, or analyze a past dispatch rather than issuing one. The script prints this list on every run so the judgement is re-checked rather than assumed. The count is quoted from the script rather than restated, because it moved from 19 to 23 when the launcher pattern was made case-insensitive (section 2d) — and a validator caught this line still giving the old number.
 - The check is a heuristic, and an earlier narrow version of it was wrong. It reported "0 unbound" while `ce-retune` required two waves to run as separate dispatched agents and `ce-simplify-code` dispatched three reviewers from its `SKILL.md` — neither carried a pointer. The pattern is now deliberately broad, and the script prints its own false positives instead of hiding them behind a single number.
 - Four files were deliberately not edited, and each is correct: `ce-compound/references/lightweight.md` (the mode launches no subagents at all), `ce-doc-review/references/subagent-template.md` and `ce-optimize/references/experiment-prompt-template.md` (prompt payloads a spawned agent receives, not launch instructions), and `ce-brainstorm/references/model-tiers.md` (tier policy for dispatches staged elsewhere — closed instead by binding `ce-brainstorm/references/dialogue.md`, the file that dispatches).
 
@@ -176,7 +178,7 @@ Every finding from the review runs, and what happened to it.
 | DSH dispatch omits the criteria mapping for personas that need one | **Fixed.** The brief instructs each agent to read the criteria files its persona names. |
 | Dispatch reads personas and run directories without resolving the artifact root | **Fixed.** The run directory resolves through the calling skill's artifact-root rules. |
 | The claimed execution evidence pointed at a file the change did not contain | **Fixed.** This file. |
-| Shipped skill files route to `ce-dsh-host` with no fallback when the load fails | **Partly fixed, and two successive claims were overstated.** 44 of the 62 bindings state the fallback. Of the 18 that do not, most are task-surface mappings and short forms, where a missing skill leaves the sentence inert; the rest are the detached-CLI peer, panel, watch, and engine-table bindings, and one (`ce-doc-review/references/dispatch.md`) states an equivalent fallback in other words. |
+| Shipped skill files route to `ce-dsh-host` with no fallback when the load fails | **Closed.** Two successive claims were overstated, then the gap itself was closed: all 62 bindings now state a fallback, in one of three wordings matched to what the binding does — dispatch bindings say to follow the file as written, task-surface bindings say the `todo_write` mapping still applies, and self-contained route bindings say the file's own route stands unchanged. |
 | The new skill points at another skill's files with skill-local path syntax | **Addressed.** The protocol resolves persona, scope, criteria, and schema paths from the calling skill's own directory. |
 | The one-line addition to `ce-pov/SKILL.md` took it past Codex's 8000-byte bound | **Fixed.** The block moved into `ce-pov/references/cross-model-panel.md`; `SKILL.md` is byte-identical to upstream. |
 

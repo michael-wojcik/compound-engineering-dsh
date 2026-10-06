@@ -86,7 +86,7 @@ Pre-dispatch eligibility is based on installed route presence and sanction, not 
 
 ## Step 4 — Start the detached peer job before local dispatch
 
-**On DeepSeek Harness**, this peer is not a subagent dispatch: it stays the detached CLI job this file defines, with its job id, reaping, and `peer.outcome` contract unchanged. The `ce-dsh-host` skill's dispatch protocol governs any subagent work on this path.
+**On DeepSeek Harness**, this peer is not a subagent dispatch: it stays the detached CLI job this file defines, with its job id, reaping, and `peer.outcome` contract unchanged. The `ce-dsh-host` skill's dispatch protocol governs any subagent work on this path. When that skill is not installed, this file's own route stands unchanged.
 
 The script is a CLI shell-out, not a subagent, so it does not consume the subagent concurrency budget. **Never hold a tool call open for the peer's runtime.** Some harnesses kill long tool calls, and a killed call makes the pass vanish silently. At Stage 3d (routing), start it as a **detached, supervised job** through the bundled runner in one short Bash call; the call prints the job id in under about 2s. Only after that call returns may the host finalize the local reviewer roster and enter Stage 4 (dispatch). The detached worker still runs alongside the local reviewers; starting it first prevents the host from also dispatching the in-process adversarial reviewer by mistake.
 

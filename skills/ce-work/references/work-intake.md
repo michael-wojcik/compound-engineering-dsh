@@ -34,7 +34,7 @@ Read this when Phase 0 classifies a bare prompt, and again at Phase 1 before rea
 
 ## Create the task list
 
-**On DeepSeek Harness**, the task surface is `todo_write`: publish this view there and keep it current. The Agent Teams shared board is separate and carries the work items of any teammates this run dispatches; the `ce-dsh-host` skill maps both.
+**On DeepSeek Harness**, the task surface is `todo_write`: publish this view there and keep it current. The Agent Teams shared board is separate and carries the work items of any teammates this run dispatches; the `ce-dsh-host` skill maps both. When that skill is not installed, the `todo_write` mapping applies unchanged.
 
 - Use the platform's task-tracking capability when available (`TaskCreate`/`TaskUpdate`/`TaskList` in Claude Code, `update_plan` in Codex, or the equivalent on other harnesses) to break the plan into actionable tasks. If none is available, continue normally without simulating a task list in chat
 - Derive tasks from the plan's implementation units, dependencies, files, test targets, and verification criteria

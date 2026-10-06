@@ -18,7 +18,7 @@ Parse the arguments you were invoked with: a PR number, a branch name, or blank 
 
 ### Resumability (stop and return at any point)
 
-**On DeepSeek Harness**, the task surface is `todo_write`: publish this view there and keep it current. The Agent Teams shared board is separate and carries the work items of any teammates this run dispatches; the `ce-dsh-host` skill maps both.
+**On DeepSeek Harness**, the task surface is `todo_write`: publish this view there and keep it current. The Agent Teams shared board is separate and carries the work items of any teammates this run dispatches; the `ce-dsh-host` skill maps both. When that skill is not installed, the `todo_write` mapping applies unchanged.
 
 This workflow is designed to be interrupted and resumed. Two pieces of state make that safe:
 
