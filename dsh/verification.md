@@ -132,7 +132,7 @@ Two guards were added: a consumer-list check that fails when the adapter's claim
 
 ## 3. Repository gates
 
-Measured against a detached worktree of `upstream/main` on the same machine. The full-suite comparison below was taken at base `030188b4`; after the second rebase (`efcb657d`) the fast gates were re-run green and the full-suite pairing was **not** repeated, so its numbers are one base old.
+Measured against a detached worktree of `upstream/main` (`efcb657d`, the current base) on the same machine, back to back.
 
 | Gate | Result |
 |---|---|
@@ -140,9 +140,9 @@ Measured against a detached worktree of `upstream/main` on the same machine. The
 | `bun run typecheck` | clean |
 | `bun run test:skill-guards` (fast subset, 22 files) | **797 pass, 0 fail** |
 | `check-coverage.sh` / `audit-bindings.sh` | exit 0, 0 skill-level gaps, 0 audit failures |
-| `bun run test` (full) | fork 29 fail, pristine upstream **19 fail** — same base, same machine |
+| `bun run test` (full) | fork **4358 pass, 81 fail**; pristine upstream **4332 pass, 105 fail** — same base, same machine, run back to back |
 
-**Attribution of the ten-test difference — closed.** One was real: the `ce-optimize` em-dash guard, described below. The other nine are load flakes: `skill-eval-cell catalog`, `pi-writer`, and `session-history-scripts` pass in isolation (151 tests, 0 fail), and `ce-babysit-pr-snapshot` with `sweep-state` — the two families that appeared only in the fork's run — pass in isolation too (202 tests, 0 fail). The remaining families flake in both runs: `ce-work serial cross-model transaction` fails 20 times pristine and 22 in the fork, `ce-work unit workspace controller` 4 pristine and 8 in the fork, all with the `spawnSync`/child-exit signature the repository's `AGENTS.md` attributes to `oven-sh/bun#34069`. With the em-dash fix in, no test failure is attributable to this fork.
+**Attribution at the current base — closed, and the fork is not the weaker tree.** Seven tests failed on the fork and not on pristine upstream; all seven pass in isolation (`7 pass, 0 fail`), which is the same load signature the earlier round found, and one of them passed on the baseline in 17 s, a hair inside its timeout. Every prose and anchor contract test passed on the fork, including the eight upstream tests added between the two bases that read `skills/**` — `pipeline-review-contract`, `review-skill-contract`, `user-facing-skill-invocation-rendering`, `unified-plan-artifact-contract`, `ce-work-outcome-spine`, `ce-plan-handoff-routing`, and the `ce-optimize-decide` em-dash guard. Those are the tests a binding could actually break, and none of them did. The fork also passed more tests than upstream and failed fewer, which is what load distribution across two runs looks like rather than a property of either tree.
 
 **A real regression this round caught.** Rebasing and running the *entire* suite found that `tests/skills/ce-optimize-decide.test.ts` rejects em dashes anywhere under the `ce-optimize` skill, and the binding paragraphs added to `loop.md` and `measurement.md` contained one. It passed on the pristine base and failed here. Both files now carry an em-dash-free binding, and that file is 81/81. The fast `test:skill-guards` subset does not include it, which is why every earlier targeted run missed it — a reminder that the subset is not the gate.
 
