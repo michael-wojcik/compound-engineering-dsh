@@ -7,6 +7,11 @@
 # 2. Placement     — the binding precedes the file's first launch instruction.
 # 3. Variant fit   — exception texts sit on genuinely cross-model or tier sites.
 # 4. Internal      — the adapter's references resolve and nothing cites a removed file.
+# 5. Consumer list — the adapter names exactly the skills that carry bindings.
+# 6. Vacuous       — no positive dispatch binding in a file that launches nothing.
+# 7. Documented    — the counts verification.md quotes match this tree. A number
+#                    restated in prose went stale twice (the launcher pattern and
+#                    a rebase each moved it), so it is checked rather than trusted.
 set -uo pipefail
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
@@ -120,6 +125,30 @@ while IFS= read -r f; do
   fi
 done < <(grep -rl "ce-dsh-host" "$SKILLS_DIR" --include="*.md" 2>/dev/null | sort)
 [[ "$vacuous" -eq 0 ]] && echo "   ok: every positive dispatch binding sits in a file that launches an agent"
+
+echo
+echo "7. DOCUMENTED COUNTS — the numbers verification.md quotes match this tree"
+stale=0
+actual_launch="$(bash "$REPO_ROOT/dsh/check-coverage.sh" 2>/dev/null | sed -n 's/.*unbound launch sites: \([0-9][0-9]*\).*/\1/p' | tail -1)"
+actual_files="$(grep -rl 'ce-dsh-host' "$SKILLS_DIR" --include='*.md' 2>/dev/null | wc -l | tr -d ' ')"
+doc_launch="$(sed -n 's/.*no in-file pointer[^0-9]*\([0-9][0-9]*\) at this revision.*/\1/p' "$REPO_ROOT/dsh/verification.md" | head -1)"
+doc_files="$(sed -n 's/.*\*\*\([0-9][0-9]*\) files carry a binding\*\*.*/\1/p' "$REPO_ROOT/dsh/verification.md" | head -1)"
+if [[ -z "$doc_launch" || -z "$doc_files" ]]; then
+  echo "   REVIEW: verification.md no longer quotes both counts, so this check cannot compare them"
+  stale=$((stale + 1))
+else
+  [[ "$doc_launch" == "$actual_launch" ]] || {
+    echo "   MISMATCH: verification.md says $doc_launch unbound launch sites, check-coverage.sh says $actual_launch"
+    stale=$((stale + 1))
+  }
+  [[ "$doc_files" == "$actual_files" ]] || {
+    echo "   MISMATCH: verification.md says $doc_files files carry a binding, the tree has $actual_files"
+    stale=$((stale + 1))
+  }
+fi
+[[ "$stale" -eq 0 ]] && echo "   ok: the record quotes $actual_launch unbound launch sites and $actual_files binding files"
+
+fails=$((fails + stale))
 
 echo
 echo "files carrying a binding: $(grep -rl 'ce-dsh-host' "$SKILLS_DIR" --include='*.md' 2>/dev/null | wc -l | tr -d ' ')"
