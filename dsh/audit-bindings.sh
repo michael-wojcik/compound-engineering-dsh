@@ -35,7 +35,11 @@ TIER='a dispatch whose model does not actually differ'
 LAUNCH_RE='(spawn|dispatch|launch|delegate)[a-z]* ((a|an|the|each|one|its|every|two|both) )?([a-z][a-z-]* ){0,3}(sub-?agent|agent|reviewer|analyst|researcher|historian|leaf|leaves|peer|worker|scout|candidate|baker|validator)'
 # The negation must sit next to the verb. Matching it anywhere on the line hid a
 # real launch ("spawn a lightweight sub-agent ... without a full review").
-NEGATE_RE='(do not|don.t|never|without|rather than|instead of|temptation to|no subagents|skips)[a-z ]{0,12}(spawn|dispatch|launch|delegate)'
+# The second alternative covers a prohibition on SUBSTITUTING a generic agent
+# ("Do not substitute a generic Task, Agent, or subagent"), which is a routing
+# rule rather than a launch. It sits here as well as in check-coverage.sh so the
+# two gates agree on what counts as a prohibition.
+NEGATE_RE='(do not|don.t|never|without|rather than|instead of|temptation to|no subagents|skips)[a-z ]{0,12}(spawn|dispatch|launch|delegate)|(do not|never|rather than|instead of)[a-z ]{0,12}substitute[a-z ]{0,40}(task|agent|subagent|reviewer)'
 
 # The launch lines in a file: a dispatch verb near an agent noun, minus the lines
 # that forbid or avoid one. Checks 2 and 6 must agree on what counts as a launch,

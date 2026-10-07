@@ -89,7 +89,11 @@ while IFS= read -r f; do
   # A line that forbids or avoids a dispatch is a mention, not a launch site.
   # The negation must sit next to the verb: matching it anywhere on the line hid
   # a real launch whose line happened to contain an unrelated "without".
-  hits="$(grep -niE "$DISPATCH_RE" "$f" | grep -vEi "(do not|don't|never|without|rather than|instead of|temptation to|no subagents|skips)[a-z ]{0,12}(spawn|dispatch|launch|delegate)" || true)"
+  # The second alternative covers a prohibition on SUBSTITUTING a generic agent
+  # ("Do not substitute a generic Task, Agent, or subagent"), which is a routing
+  # rule rather than a launch. Measured before adding: it removes exactly one
+  # candidate from this list and adds none.
+  hits="$(grep -niE "$DISPATCH_RE" "$f" | grep -vEi "(do not|don't|never|without|rather than|instead of|temptation to|no subagents|skips)[a-z ]{0,12}(spawn|dispatch|launch|delegate)|(do not|never|rather than|instead of)[a-z ]{0,12}substitute[a-z ]{0,40}(task|agent|subagent|reviewer)" || true)"
   if [[ -z "$hits" ]]; then
     mentions=$((mentions + 1))
     continue
