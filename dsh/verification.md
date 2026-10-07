@@ -71,7 +71,7 @@ The objective has two halves, and this is the first: that the DSH skills still *
 | Files deleted or renamed | **0** |
 | Upstream lines modified or removed | **0** |
 | Lines added across `skills/` | **140**, across 63 files |
-| Non-plugin divergence | the `dsh/` tree only — the adapter skill, the three scripts, `README.md`, `verification.md` |
+| Non-plugin divergence | the `dsh/` tree — the adapter skill, four scripts and their test, `README.md`, `verification.md`, `CODING_STANDARDS.md` — plus one captured learning under `docs/solutions/developer-experience/`, which is where this repository's own convention files learnings and where the sibling "a global git setting broke the suite" doc already lives |
 | Untouched | every manifest, `src/`, `tests/`, the plugin `README.md`, the marketplace catalogs, and all 36 `SKILL.md` files except two that took a standalone paragraph |
 
 Every upstream instruction is byte-identical: the fork adds binding paragraphs and changes no original sentence. The two files whose line counts moved are `ce-doc-review/references/dispatch.md` and `ce-explain/SKILL.md`, and in both the binding was first written *into* the upstream sentence and then moved out to its own paragraph, precisely so this table could read zero modified lines rather than two.
