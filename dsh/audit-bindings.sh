@@ -14,9 +14,10 @@
 #                    a rebase each moved it), so it is checked rather than trusted.
 set -uo pipefail
 # `-e` is deliberately absent, and adding it would break this script in two places.
-# Section 2 reads the exit status of a grep pipeline allowed to match nothing
-# (line 55's empty-lline path depends on surviving that), and section 7 assigns a
-# command substitution precisely so it can read a non-zero status on the next line.
+# Check 2 reads the exit status of a grep pipeline that is allowed to match
+# nothing, and check 7 assigns a command substitution precisely so it can read a
+# non-zero status on the next line. (Named by section, not by line: the previous
+# wording pointed at line numbers and went stale the first time code moved.)
 # Enabling `-e` needs `|| true` on each relying substitution first — a behaviour-
 # verified change of its own, not a consistency cleanup.
 
@@ -119,7 +120,7 @@ missing=0
 while IFS= read -r ref; do
   [[ -n "$ref" ]] || continue
   [[ -f "$ADAPTER/$ref" ]] || { echo "   FAIL: adapter cites missing $ref"; missing=$((missing + 1)); }
-done < <(grep -oE 'references/[A-Za-z0-9_/-]+\.md' "$ADAPTER/SKILL.md" 2>/dev/null | sort -u)
+done < <(grep -rhoE 'references/[A-Za-z0-9_/-]+\.md' "$ADAPTER" --include='*.md' 2>/dev/null | sort -u)
 fails=$((fails + missing))
 [[ "$missing" -eq 0 ]] && echo "   ok: every reference the adapter names resolves"
 

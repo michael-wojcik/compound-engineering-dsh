@@ -21,6 +21,13 @@ SKILLS_DIR="$REPO_ROOT/skills"
 # Dispatch verbs near an agent noun, plus CE's object-less phrasings.
 DISPATCH_RE='(spawn|dispatch|launch|delegate)[a-z]*[^.]{0,60}(agent|reviewer|analyst|researcher|historian|leaf|leaves|peer|worker|scout|candidate|baker|validator)|separate dispatched agents|candidate and judge delegation'
 
+# The negation filter below is deliberately NOT the same string as audit-bindings.sh's
+# NEGATE_RE, and the difference is the apostrophe: this file matches a literal `don't`
+# while that one matches `don.t`, which as an ERE also matches "dont" and "donXt".
+# This pattern is the broader net for the broader DISPATCH_RE — two reviewers have now
+# proposed unifying them, and unifying means adopting one file's detections. If you do
+# it, move both gates' counts in the same commit.
+
 is_prompt_asset() {
   case "$1" in
   */personas/* | */agents/*) return 0 ;;
@@ -114,5 +121,13 @@ this dispatch is an Agent Teams teammate
 VARIANTS
 
 echo
+# The guard at the top of this script tests that skill directories exist; this one
+# tests that a skill was actually read. They are different failures: a tree whose
+# directories all lack a SKILL.md used to scan zero skills and still exit 0, which
+# is a gate reporting success over input it never parsed.
+if (( scanned == 0 )); then
+  echo "GATE FAIL: scanned 0 skills under $SKILLS_DIR — directories exist but none held a SKILL.md." >&2
+  exit 2
+fi
 echo "skills scanned: $scanned, skill-level gaps: $unbound, unbound launch sites: $launch_unbound, mentions: $mentions"
 exit "$unbound"

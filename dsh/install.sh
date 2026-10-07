@@ -43,13 +43,19 @@ resolve_project_root() {
 }
 
 # Absolute path a symlink points at, whether its target is absolute or relative.
+# The path is normalised when it resolves: a link written relative to its own
+# directory used to be compared unresolved, so `…/x/../skills/ce-plan` never
+# matched `…/skills/ce-plan` and a correct link was reported stale — and then
+# refused removal as "not owned by this checkout". When the path does not
+# resolve, the unresolved form is returned so classification still works.
 link_target_abs() {
-  local link="$1" target
+  local link="$1" target raw
   target="$(readlink "$link")"
   case "$target" in
-  /*) printf '%s\n' "$target" ;;
-  *) printf '%s\n' "$(cd "$(dirname "$link")" && pwd)/$target" ;;
+  /*) raw="$target" ;;
+  *) raw="$(cd "$(dirname "$link")" && pwd)/$target" ;;
   esac
+  printf '%s\n' "$(cd "$raw" 2>/dev/null && pwd || printf '%s' "$raw")"
 }
 
 MODE="install"
@@ -123,7 +129,10 @@ each_skill() {
 if [[ "$MODE" == "check" ]]; then
   echo "skill root: $TARGET_ROOT"
   bad=0
+  units=0
   while read -r name expected; do
+    [[ -n "$name" ]] || continue
+    units=$((units + 1))
     link="$TARGET_ROOT/$name"
     if [[ -L "$link" ]]; then
       actual="$(link_target_abs "$link")"
@@ -147,24 +156,39 @@ if [[ "$MODE" == "check" ]]; then
       bad=1
     fi
   done < <(each_skill)
+  # Zero units read is not a pass. Both source roots can be absent or empty, and
+  # the loop above would then report no problems because it saw no skills.
+  if (( units == 0 )); then
+    echo "GATE FAIL: no installable skills under ${SOURCE_ROOTS[*]} — the check read nothing." >&2
+    exit 2
+  fi
   exit "$bad"
 fi
 
 if [[ "$MODE" == "uninstall" ]]; then
+  # Sweep by ownership over the target root, not over the current skill list: a
+  # link whose skill upstream removed is still this checkout's link, and
+  # enumerating only current skills left it dangling forever. A link into this
+  # checkout from outside the skill roots is treated as the user's, not ours.
   removed=0
   skipped=0
-  while read -r name expected; do
-    link="$TARGET_ROOT/$name"
+  shopt -s nullglob
+  for link in "$TARGET_ROOT"/*; do
     [[ -L "$link" ]] || continue
+    name="$(basename "$link")"
     actual="$(link_target_abs "$link")"
-    if [[ "$actual" == "$expected" ]]; then
+    case "$actual" in
+    "$REPO_ROOT"/skills/* | "$REPO_ROOT"/dsh/skills/*)
       rm "$link"
       removed=$((removed + 1))
-    else
+      ;;
+    *)
       echo "kept $name (points at $actual, not this checkout)" >&2
       skipped=$((skipped + 1))
-    fi
-  done < <(each_skill)
+      ;;
+    esac
+  done
+  shopt -u nullglob
   echo "removed $removed symlink(s) from $TARGET_ROOT; kept $skipped not owned by this checkout"
   exit 0
 fi
@@ -172,14 +196,28 @@ fi
 mkdir -p "$TARGET_ROOT"
 linked=0
 while read -r name expected; do
+  [[ -n "$name" ]] || continue
   link="$TARGET_ROOT/$name"
-  if [[ -e "$link" && ! -L "$link" ]]; then
+  if [[ -L "$link" ]]; then
+    # A foreign link is someone else's wiring. Refuse it, matching how --check
+    # reports it and how --uninstall protects it, rather than silently replacing.
+    actual="$(link_target_abs "$link")"
+    if [[ "$actual" != "$expected" && "$actual" != "$REPO_ROOT"/* ]]; then
+      echo "refusing to replace foreign symlink: $link -> $actual" >&2
+      exit 1
+    fi
+  elif [[ -e "$link" ]]; then
     echo "refusing to replace non-symlink: $link" >&2
     exit 1
   fi
   ln -sfn "$expected" "$link"
   linked=$((linked + 1))
 done < <(each_skill)
+
+if (( linked == 0 )); then
+  echo "GATE FAIL: no installable skills under ${SOURCE_ROOTS[*]} — nothing was linked." >&2
+  exit 2
+fi
 
 echo "linked $linked skill(s) into $TARGET_ROOT"
 echo "start a new DSH session, or wait for the skill catalog to refresh"
