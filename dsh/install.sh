@@ -130,9 +130,11 @@ if [[ "$MODE" == "check" ]]; then
   echo "skill root: $TARGET_ROOT"
   bad=0
   units=0
+  seen=""
   while read -r name expected; do
     [[ -n "$name" ]] || continue
     units=$((units + 1))
+    seen="$seen$name"$'\n'
     link="$TARGET_ROOT/$name"
     if [[ -L "$link" ]]; then
       actual="$(link_target_abs "$link")"
@@ -156,6 +158,23 @@ if [[ "$MODE" == "check" ]]; then
       bad=1
     fi
   done < <(each_skill)
+  # Leftovers: a link this checkout owns whose skill no longer exists. The loop
+  # above only walks current skills, so without this pass --check called a root
+  # clean that --uninstall would then sweep. Same ownership rule, both modes.
+  shopt -s nullglob
+  for link in "$TARGET_ROOT"/*; do
+    [[ -L "$link" ]] || continue
+    name="$(basename "$link")"
+    actual="$(link_target_abs "$link")"
+    case "$actual" in
+    "$REPO_ROOT"/skills/* | "$REPO_ROOT"/dsh/skills/*) ;;
+    *) continue ;;
+    esac
+    grep -qx "$name" <<<"$seen" && continue
+    echo "  removed  $name (skill no longer shipped)"
+    bad=1
+  done
+  shopt -u nullglob
   # Zero units read is not a pass. Both source roots can be absent or empty, and
   # the loop above would then report no problems because it saw no skills.
   if (( units == 0 )); then

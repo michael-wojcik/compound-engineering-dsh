@@ -100,6 +100,7 @@ check "check over no skill roots fails loudly" 2 "$?"
 DSH_SKILLS_DIR="$TMP/target2" bash "$N/dsh/install.sh" >/dev/null 2>&1
 check "install over no skill roots fails loudly" 2 "$?"
 ln -sfn "$REPO_ROOT/skills/gone-skill" "$T/gone-skill"
+check "check reports a link whose skill is gone" 1 "$(rc_of bash "$REPO_ROOT/dsh/install.sh" --check)"
 DSH_SKILLS_DIR="$T" bash "$REPO_ROOT/dsh/install.sh" --uninstall >/dev/null 2>&1
 [[ -L "$T/gone-skill" ]] && gone=1 || gone=0
 check "uninstall sweeps a link whose skill is gone" 0 "$gone"
